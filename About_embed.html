@@ -12,98 +12,66 @@
   html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden; /* disables third scrollbar */
+    overflow: hidden; /* disables outer iframe scrollbar */
     font-family: sans-serif;
   }
 
-  /* ===== Main window pane ===== */
-  .window-pane {
+  /* ===== Single scrollable container ===== */
+  .scroll-container {
     display: flex;
-    gap: 10px;
+    gap: 20px;
+    height: 100%;
     padding: 10px;
     box-sizing: border-box;
-    height: 100vh; /* fill viewport */
-    background: linear-gradient(90deg, var(--primary) 21px, transparent 1%) center,
-                linear-gradient(var(--primary) 21px, transparent 1%) center,
-                var(--secondary);
-    background-size: 22px 22px;
-    overflow: hidden; /* prevent pane scroll */
+    overflow-y: auto; /* single scrollbar */
   }
 
-  /* ===== Left scrollable box ===== */
-  .model-box-container {
+  /* ===== Left column (images) ===== */
+  .left-content {
     flex: 1;
-    max-width: 50%;
-    background: var(--secondary); /* theme background */
-    border: 0.2em solid var(--secondary);
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 4px;
-
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto; /* only left panel scrolls */
-  }
-
-  .model-box-content {
-    background: var(--primary); /* inner custom theme background */
-    padding: 5px;
-    border-radius: 4px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
 
-  .model-box-content model-viewer {
-    width: 100%;
-    height: 400px; /* or auto for flexible height */
-    flex-shrink: 0;
-    display: block;
-    border: none;
+  .image-container {
+    background: var(--secondary);
+    border: 0.2em solid var(--secondary);
+    border-radius: 4px;
+    padding: 5px;
   }
 
-  .model-box-content img {
+  .image-container img {
     width: 100%;
     height: auto;
     border-radius: 4px;
   }
 
-  /* ===== Right scrollable text panel ===== */
-  .text-box {
-    flex: 1;                
-    max-width: 50%;
+  /* ===== Right column (text) ===== */
+  .right-content {
+    flex: 1;
     background: #f0f0f0;
     border: 0.2em solid var(--secondary);
+    border-radius: 4px;
     padding: 20px;
     box-sizing: border-box;
-    border-radius: 4px;
-    overflow-y: auto; /* only right panel scrolls */
-  }
-
-  /* ===== Optional: hide extra scrollbar buttons in WebKit ===== */
-  .model-box-container::-webkit-scrollbar-button,
-  .text-box::-webkit-scrollbar-button {
-    display: none;
   }
 </style>
 </head>
 <body>
 
-<div class="window-pane">
+<div class="scroll-container">
 
-  <!-- Left scrollable box -->
-  <div class="model-box-container">
-    <div class="model-box-content">
-     <img src="photos/J.jpg" alt="Me">
-
-      <img src="https://images.wallpaperscraft.com/image/single/puppy_dog_animal_209844_800x600.jpg" alt="Puppy">
-      <img src="image2.jpg" alt="Extra image">
-      <img src="image3.jpg" alt="Extra image">
-    </div>
+  <!-- Left column -->
+  <div class="left-content">
+    <div class="image-container"><img src="photos/J.jpg" alt="Me"></div>
+    <div class="image-container"><img src="https://images.wallpaperscraft.com/image/single/puppy_dog_animal_209844_800x600.jpg" alt="Puppy"></div>
+    <div class="image-container"><img src="image2.jpg" alt="Extra image"></div>
+    <div class="image-container"><img src="image3.jpg" alt="Extra image"></div>
   </div>
 
-  <!-- Right scrollable text panel -->
-  <div class="text-box">
+  <!-- Right column -->
+  <div class="right-content">
     <h2>About Me</h2>
     <h3>js@jessesantoro.com</h3>
     <h3>Resume</h3>
