@@ -8,107 +8,104 @@
 </script>
 <link rel="stylesheet" href="system.css" />
 <style>
-  /* ===== Prevent outer page scroll ===== */
   html, body {
-    height: 100%;
     margin: 0;
-    overflow: hidden; /* disables third scrollbar */
+    padding: 0;
+    height: 100%;
     font-family: sans-serif;
+    overflow: auto; /* allow scrolling inside iframe */
   }
 
-  /* ===== Main window pane ===== */
-  .window-pane {
+  /* Single scrollable container for the whole page */
+  .scroll-container {
     display: flex;
-    gap: 10px;
+    gap: 20px;
     padding: 10px;
     box-sizing: border-box;
-    height: 100vh; /* fill viewport */
-    background: linear-gradient(90deg, var(--primary) 21px, transparent 1%) center,
-                linear-gradient(var(--primary) 21px, transparent 1%) center,
-                var(--secondary);
-    background-size: 22px 22px;
-    overflow: hidden; /* prevent pane scroll */
   }
 
-  /* ===== Left scrollable box ===== */
-  .model-box-container {
+  /* Left column */
+  .left-content {
     flex: 1;
-    max-width: 50%;
-    background: var(--secondary); /* theme background */
-    border: 0.2em solid var(--secondary);
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 4px;
-
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto; /* only left panel scrolls */
-  }
-
-  .model-box-content {
-    background: var(--primary); /* inner custom theme background */
-    padding: 5px;
-    border-radius: 4px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
 
-  .model-box-content model-viewer {
+  .model-container {
+    background: var(--secondary);
+    border: 0.2em solid var(--secondary);
+    border-radius: 4px;
+    padding: 10px;
+  }
+
+  .model-container model-viewer {
     width: 100%;
-    height: 200px; 
-    flex-shrink: 0;
+    height: auto; /* grows naturally */
+    min-height: 200px;
     display: block;
     border: none;
   }
 
-  .model-box-content img {
+  .image-container img {
     width: 100%;
     height: auto;
     border-radius: 4px;
   }
 
-  /* ===== Right scrollable text panel ===== */
-  .text-box {
-    flex: 1;                
-    max-width: 50%;
+  /* Right column (gray box) */
+  .right-content {
+    flex: 1;
     background: #f0f0f0;
     border: 0.2em solid var(--secondary);
+    border-radius: 4px;
     padding: 20px;
     box-sizing: border-box;
-    border-radius: 4px;
-    overflow-y: auto; /* only right panel scrolls */
   }
 
-  /* ===== Optional: hide extra scrollbar buttons in WebKit ===== */
-  .model-box-container::-webkit-scrollbar-button,
-  .text-box::-webkit-scrollbar-button {
-    display: none;
+  /* Readable spacing */
+  .right-content p, .right-content h2, .right-content h3 {
+    margin-bottom: 1em;
   }
 </style>
 </head>
 <body>
 
-<div class="window-pane">
+<div class="scroll-container">
 
-  <!-- Left scrollable box -->
-  <div class="model-box-container">
-    <div class="model-box-content">
-       <model-viewer src="models/camara.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" auto-rotate camera-orbit="159.3deg 91.91deg 0.188m" field-of-view="30deg">
-      <div class="progress-bar hide" slot="progress-bar">
-          <div class="update-bar"></div>
-      </div>
-    </model-viewer>  
-      
+  <!-- Left column -->
+  <div class="left-content">
+    <div class="model-container">
+      <model-viewer 
+        src="models/camara.glb" 
+        ar 
+        ar-modes="webxr scene-viewer quick-look" 
+        camera-controls 
+        tone-mapping="neutral" 
+        poster="poster.webp" 
+        shadow-intensity="1" 
+        auto-rotate 
+        camera-orbit="159.3deg 91.91deg 0.188m" 
+        field-of-view="30deg">
+        <div class="progress-bar hide" slot="progress-bar">
+            <div class="update-bar"></div>
+        </div>
+      </model-viewer>
+    </div>
 
-      <img src="photos/Camara_Designs.png">
+    <div class="image-container">
+      <img src="photos/Camara_Designs.png" alt="Extra image">
+    </div>
+    <div class="image-container">
       <img src="image2.jpg" alt="Extra image">
+    </div>
+    <div class="image-container">
       <img src="image3.jpg" alt="Extra image">
     </div>
   </div>
 
-  <!-- Right scrollable text panel -->
-  <div class="text-box">
+  <!-- Right column (gray box) -->
+  <div class="right-content">
     <h2>Project Overview</h2>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
     <p>Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>

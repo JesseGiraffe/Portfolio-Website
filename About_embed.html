@@ -23,7 +23,6 @@
     height: 100%;
     padding: 10px;
     box-sizing: border-box;
-    overflow-y: auto; /* single scrollbar */
   }
 
   /* ===== Left column (images) ===== */
@@ -55,6 +54,10 @@
     border-radius: 4px;
     padding: 20px;
     box-sizing: border-box;
+
+    /* ===== Fix for overflowing text ===== */
+    max-height: 100%;
+    overflow-y: auto; /* scroll only the right column */
   }
 </style>
 </head>
@@ -74,31 +77,12 @@
   <div class="right-content">
     <h2>About Me</h2>
     <h3>js@jessesantoro.com</h3>
-    <h3>Resume</h3>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-    <p>Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
-    <p>Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat.</p>
-    <p>Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim.</p>
-    <p>Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue.</p>
-    <p>Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales.</p>
-    <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.</p>
-    <p>Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales hendrerit.</p>
-    <p>Ut velit mauris, egestas sed, gravida nec, ornare ut, mi. Aenean ut orci vel massa suscipit pulvinar.</p>
-    <p>Nulla sollicitudin. Fusce varius, ligula non tempus aliquam, nunc turpis ullamcorper nibh, in tempus sapien eros vitae ligula.</p>
-    <p>Pellentesque rhoncus nunc et augue. Integer id felis. Curabitur aliquet pellentesque diam.</p>
-    <p>Integer quis metus vitae elit lobortis egestas. Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
-    <p>Morbi vel erat non mauris convallis vehicula. Nulla et sapien. Integer tortor tellus, aliquam faucibus, convallis id, congue eu, quam.</p>
-    <p>Mauris ullamcorper felis vitae erat. Proin feugiat, augue non elementum posuere, metus purus iaculis lectus, et tristique ligula justo vitae magna.</p>
-    <p>Aliquam convallis sollicitudin purus. Praesent aliquam, enim at fermentum mollis, ligula massa adipiscing nisl, ac euismod nibh nisl eu lectus.</p>
-    <p>Fusce vulputate sem at sapien. Vivamus leo. Aliquam euismod libero eu enim.</p>
-    <p>Nullam nec magna. Donec id justo. Curabitur consectetuer.</p>
-    <p>Quisque tincidunt scelerisque libero. Sed feugiat. Donec odio tempus molestie, porttitor ut, iaculis quis, sem.</p>
-    <p>Phasellus rhoncus. Aenean id metus id velit ullamcorper pulvinar.</p>
-    <p>Vestibulum fermentum tortor id mi. Pellentesque ipsum. Nulla non arcu lacinia neque faucibus fringilla.</p>
-    <p>Nulla facilisi. Aenean nec eros. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae.</p>
-    <p>Suspendisse sollicitudin velit sed leo. Ut pharetra augue nec augue.</p>
-    <p>Nam elit magna, hendrerit sit amet, tincidunt ac, viverra sed, nulla.</p>
-    <p>Donec porta diam eu massa. Quisque diam lorem, interdum vitae, dapibus ac, scelerisque vitae, pede.</p>
+    <h3>A Breif Intro</h3>
+    <p>As a Engineer and Designer, I strive to focus on the small details without losing the overall big picture idea. When I develop a product, I prioritize its functionality, considering how it will integrate seamlessly into your life.</p>
+    <p>I believe rather than adapting the user to the product, the product should adapt to the user. If I had to pinpoint some of my strongest skills, it would be developing CAD models and constructing functional prototypes.</p>
+    <p>Through my portfolio, I want to demonstrate both my creativity and technicality, integrating both design and engineering skills to produce aesthetically pleasing and practical products.</p>
+    <p>I enjoy finding solutions to complex problems that involve bringing my ideas to life. I am detail-oriented and always focus on the small details without losing the bigger picture. I am not afraid to ask questions or investigate multiple approaches to determine the best solution.</p>
+    <p>Ever since I was little, I’ve always been curious about how things work, and that motivated me to study engineering and design so that I can help to create those same things that always fascinated me.</p>
   </div>
 
 </div>

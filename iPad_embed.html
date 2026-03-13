@@ -9,23 +9,20 @@
 <link rel="stylesheet" href="system.css" />
 <style>
   html, body {
-    height: 100%;
     margin: 0;
-    overflow: hidden; /* iframe itself won't scroll */
     font-family: sans-serif;
   }
 
-  /* Single scrollable container */
+  /* Scrollable container */
   .scroll-container {
     display: flex;
     gap: 20px;
-    height: 100%;
     padding: 10px;
     box-sizing: border-box;
-    overflow-y: auto; /* single scrollbar */
+    overflow-y: auto; /* single scrollbar for both columns */
   }
 
-  /* Left column wrapper */
+  /* Left column */
   .left-content {
     flex: 1;
     display: flex;
@@ -55,7 +52,7 @@
     border-radius: 4px;
   }
 
-  /* Right column with gray box */
+  /* Right column (gray box) */
   .right-content {
     flex: 1;
     background: #f0f0f0; /* gray box */
@@ -63,6 +60,11 @@
     border-radius: 4px;
     padding: 20px;
     box-sizing: border-box;
+  }
+
+  /* Readable spacing */
+  .right-content p, .right-content h2, .right-content h3 {
+    margin-bottom: 1em;
   }
 </style>
 </head>
@@ -85,7 +87,7 @@
     </div>
 
     <div class="image-container">
-      <img src="photos/photo_ipad1.png">
+      <img src="photos/photo_ipad1.png" alt="Extra image">
     </div>
     <div class="image-container">
       <img src="photos/photo_ipad2.png" alt="Extra image">
@@ -93,21 +95,40 @@
     <div class="image-container">
       <img src="photos/photo_ipad3.jpg" alt="Extra image">
     </div>
+    <div class="image-container">
+      <img src="photos/photo_ipad_5.png" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_ipad_6.png" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_ipad_7.png" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_ipad_8.jpg" alt="Extra image">
+    </div>
   </div>
 
-  <!-- Right column -->
+  <!-- Right column (gray box) -->
   <div class="right-content">
-    <h2>Project Overview</h2>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-    <p>Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
-    <p>Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat.</p>
-    <p>Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim.</p>
-    <p>Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue.</p>
-    <p>Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales.</p>
-    <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh.</p>
-    <p>Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales hendrerit.</p>
-    <p>Ut velit mauris, egestas sed, gravida nec, ornare ut, mi. Aenean ut orci vel massa suscipit pulvinar.</p>
-    <p>Nulla sollicitudin. Fusce varius, ligula non tempus aliquam, nunc turpis ullamcorper nibh, in tempus sapien eros vitae ligula.</p>
+        <h2>SOLIDWORKS Simulations FEA</h2>
+    <h2>Beginning</h2>
+    <p><strong>The CAD model on the left is interactive and can be rotated!</strong></p>
+    <p><strong>Goal:</strong>The goal was to test a product under real life loads in order to determine if the design was currently sufficient and what improvements we could make to reduce costs and improve performance.</p>
+    <p><strong>Limitations:</strong> The design must remain practical for users, maintain stability under load, and use an aluminum alloy that is both priced economically and performs efficiently.</p>
+    <p><strong>Purpose:</strong> The overall goal of this project was to produce a functional, lightweight, and structurally sound iPad stand, using CAD then through SOLIDWORKS simulations analysis to optimize the material and geometry for structural stability and cost effectiveness.</p>
+
+    <h2>Middle</h2>
+    <p><strong>Decisions:</strong> Key design decisions focused on the overall geometry of the stand, and identifying stress points that could compromise the structure.</p>
+    <p><strong>Process:</strong> The process involved creating a SOLIDWORKS model of the stand, running a statics study to calculate safety factors, and iteratively refining the design. The initial study used 1060 H12 aluminum, producing a calculated safety factor of 7.6 for the heaviest iPad tablet currently on the market. A switch to a weaker 1060 aluminum alloy gave a more reasonable safety factor of 2.8, which was sufficient and helped to reduce overall product cost. However, this did not account for future heavier tablets that may be released onto the market. Analysis showed that most stress was applied to the back of the stand due to a large hole weakening the structure. Further adjustments to reduce base and neck thickness to 0.14 in brought the safety factor to 3.7 while still supporting the heaviest tablet. Eventually, design refinements included removing the hole and changing chamfers to fillets, which improved the safety factor to 4.7. This allowed us to also reduce overall manufacturing complexity alongside the cost savings from the change to the 1060 aluminum alloy.</p>
+    <p><strong>Materials:</strong> Aluminum 1060 H12 and 1060 alloys were used, with the final design optimized for material reduction without compromising structural integrity. CAD models and SOLIDWORKS simulations guided the iterative adjustments to model geometry and material choices.</p>
+
+    <h2>End</h2>
+    <p><strong>How did this solve the problem?</strong><br>
+    The stand was optimized to safely support the heaviest iPad while using minimal material, removing structural weaknesses, and allowing for better force distribution.</p>
+    <p><strong>How did this achieve this purpose?</strong><br>
+    By iteratively refining the design based on stress analysis, the stand achieved an efficient balance between safety and material use. It maintained shape under load, improved overall durability, and allowed for a thinner, more cost-effective design.</p>
+    <p>My project demonstrates my ability to optimize a product through CAD analysis and structural reasoning, showing that I can design solutions grounded in engineering principles while improving efficiency and functionality.</p>
   </div>
 
 </div>

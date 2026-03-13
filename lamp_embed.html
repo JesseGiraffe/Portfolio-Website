@@ -9,23 +9,20 @@
 <link rel="stylesheet" href="system.css" />
 <style>
   html, body {
-    height: 100%;
     margin: 0;
-    overflow: hidden; /* disables outer iframe scrollbar */
     font-family: sans-serif;
   }
 
-  /* ===== Single scrollable container ===== */
+  /* Scrollable page container */
   .scroll-container {
     display: flex;
     gap: 20px;
-    height: 100%;
     padding: 10px;
     box-sizing: border-box;
-    overflow-y: auto; /* single scrollbar */
+    overflow-y: auto; /* single scrollbar for everything */
   }
 
-  /* ===== Left column wrapper ===== */
+  /* Left column */
   .left-content {
     flex: 1;
     display: flex;
@@ -46,14 +43,19 @@
     border-radius: 4px;
   }
 
-  /* ===== Right column with gray box ===== */
+  /* Right column (gray box) */
   .right-content {
-    flex: 1;
-    background: #f0f0f0; /* gray box */
+    flex: 1; /* optional */
+    background: #f0f0f0;
     border: 0.2em solid var(--secondary);
     border-radius: 4px;
     padding: 20px;
     box-sizing: border-box;
+  }
+
+  /* Spacing for readability */
+  .right-content p, .right-content h2, .right-content h3 {
+    margin-bottom: 1em;
   }
 </style>
 </head>
@@ -74,7 +76,7 @@
     <div class="image-container"><img src="photos/lamp7.jpg" alt="Extra image"></div>
   </div>
 
-  <!-- Right column -->
+  <!-- Right column (gray box) -->
   <div class="right-content">
     <h2>SpriteLite</h2>
     <h2>Beginning</h2>
