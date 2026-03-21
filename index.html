@@ -151,7 +151,8 @@
     Projects
     <ul role="menu">
       <li role="menu-item"><a href="#menu" data-iframe="iPad_embed.html" data-title="iPad Stand Project">iPad Stand (SOLIDWORKS Simulation)</a></li>
-            <li role="menu-item"><a href="#menu" data-iframe="caliper_embed.html" data-title="Chair Project">Caliper Attachment (Mill Project)</a></li>
+            <li role="menu-item"><a href="#menu" data-iframe="caliper_embed.html" data-title="Caliper Attachment (Mill Project)">Caliper Attachment (Mill Project)</a></li>
+            <li role="menu-item"><a href="#menu" data-iframe="pinpunch_embed.html" data-title="Pinpunch (Lathe Project)">Pinpunch (Lathe Project)</a></li>
       <li role="menu-item"><a href="#menu" data-iframe="ActionCamara_embed.html" data-title="Action Camara Project">Action Camara</a></li>
       <li role="menu-item"><a href="#menu" data-iframe="Mechatronics_embed.html" data-title="Mechatronics Storage Project">Mechatronics Storage</a></li>
       <li role="menu-item"><a href="#menu" data-iframe="lamp_embed.html" data-title="Lamp Project">Lamp Project</a></li>
@@ -172,22 +173,23 @@
 </ul>
 
 <!-- ===== WINDOW ===== -->
+ <div>
 <div class="window" style="position: absolute;
 
-      top: 10%;
-      left: 25%;
-      width: 50%;
-      height: 70%;
+      top: 50px;
+     bottom: 10%;
+      left: 20%;
+      width: 60%;
+    margin: 20px;
       min-width: 400px;
       min-height: 300px;
-      max-height: 1000px;
       max-width: 80%;
       box-sizing: border-box;
       cursor: default;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-bottom: 60px;" data-draggable id="draggableWindow">
+     " data-draggable id="draggableWindow">
 
   <div class="title-bar" id="titleBar">
     <button aria-label="Close" class="close"></button>
@@ -208,6 +210,7 @@
 
   <div class="resizer" id="resizer"></div>
 
+</div>
 </div>
 <!--Image Gallery-->
 <div id="project-photos" class="window" style="margin-top: 45%;"  >
