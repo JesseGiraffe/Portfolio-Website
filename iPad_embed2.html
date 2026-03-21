@@ -10,18 +10,16 @@
 <style>
   html, body {
     margin: 0;
-    padding: 0;
-    height: 100%;
     font-family: sans-serif;
-    overflow: auto; /* allow scrolling inside iframe */
   }
 
-  /* Single scrollable container for the whole page */
+  /* Scrollable container */
   .scroll-container {
     display: flex;
     gap: 20px;
     padding: 10px;
     box-sizing: border-box;
+    overflow-y: auto; /* single scrollbar for both columns */
   }
 
   /* Left column */
@@ -32,7 +30,7 @@
     gap: 10px;
   }
 
-   .model-container {
+  .model-container {
     background: var(--secondary); /* card background */
     border: 0.2em solid var(--secondary);
     border-radius: 4px;
@@ -44,6 +42,10 @@
     height: 400px; /* visible height for model */
   }
 
+  .image-container {
+    width: 100%;
+  }
+
   .image-container img {
     width: 100%;
     height: auto;
@@ -53,7 +55,7 @@
   /* Right column (gray box) */
   .right-content {
     flex: 1;
-    background: #f0f0f0;
+    background: #f0f0f0; /* gray box */
     border: 0.2em solid var(--secondary);
     border-radius: 4px;
     padding: 20px;
@@ -97,16 +99,22 @@
       <img src="photos/photo_ipad_5.png" alt="Extra image">
     </div>
     <div class="image-container">
+      <img src="photos/photo_ipad_6.png" alt="Extra image">
+    </div>
+    <div class="image-container">
       <img src="photos/photo_ipad_7.png" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_ipad_8.jpg" alt="Extra image">
     </div>
   </div>
 
   <!-- Right column (gray box) -->
-<div class="right-content">
+  <div class="right-content">
         <h2>SOLIDWORKS Simulations FEA</h2>
     <h2>The Problem</h2>
     <p><strong>The CAD model on the left is interactive and can be rotated!</strong></p>
-    <p><strong>Goal:</strong> The goal was to test a product under real life loads in order to determine if the design was currently sufficient and what improvements we could make to reduce costs and improve performance.</p>
+    <p><strong>Goal:</strong>The goal was to test a product under real life loads in order to determine if the design was currently sufficient and what improvements we could make to reduce costs and improve performance.</p>
     <p><strong>Limitations:</strong> The design must remain practical for users, maintain stability under load, and use an aluminum alloy that is both priced economically and performs efficiently.</p>
     <p><strong>Purpose:</strong> The overall goal of this project was to produce a functional, lightweight, and structurally sound iPad stand, using CAD then through SOLIDWORKS simulations analysis to optimize the material and geometry for structural stability and cost effectiveness.</p>
 
@@ -120,11 +128,7 @@
     The stand was optimized to safely support the heaviest iPad while using minimal material, removing structural weaknesses, and allowing for better force distribution.</p>
     <p><strong>How did this achieve this purpose?</strong><br>
     By iteratively refining the design based on stress analysis, the stand achieved an efficient balance between safety and material use. It maintained shape under load, improved overall durability, and allowed for a thinner, more cost-effective design.</p>
-    <p>This project demonstrates my ability to optimize a product through CAD analysis and structural reasoning, showing that I can design solutions grounded in engineering principles while improving efficiency and functionality.</p>
-     <div class="image-container">
-      <img src="photos/photo_ipad_6.png" alt="Extra image">
-    </div>
- 
+    <p>My project demonstrates my ability to optimize a product through CAD analysis and structural reasoning, showing that I can design solutions grounded in engineering principles while improving efficiency and functionality.</p>
   </div>
 
 </div>

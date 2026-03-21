@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>iPad Embed</title>
+<script type="module"
+  src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js">
+</script>
+<link rel="stylesheet" href="system.css" />
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+    overflow: auto; /* allow scrolling inside iframe */
+  }
+
+  /* Single scrollable container for the whole page */
+  .scroll-container {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  /* Left column */
+  .left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .model-container {
+    background: var(--secondary);
+    border: 0.2em solid var(--secondary);
+    border-radius: 4px;
+    padding: 10px;
+  }
+
+  .model-container model-viewer {
+    width: 100%;
+    height: auto; /* grows naturally */
+    min-height: 200px;
+    display: block;
+    border: none;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  /* Right column (gray box) */
+  .right-content {
+    flex: 1;
+    background: #f0f0f0;
+    border: 0.2em solid var(--secondary);
+    border-radius: 4px;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Readable spacing */
+  .right-content p, .right-content h2, .right-content h3 {
+    margin-bottom: 1em;
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-container">
+
+  <!-- Left column -->
+  <div class="left-content">
+
+    <div class="image-container">
+      <img src="photos/photo_mill11.jpg" alt="Complete Product">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_mill1.jpg" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_mill3.jpg" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_mill4.jpg" alt="Extra image">
+    </div>
+    <div class="image-container">
+      <img src="photos/photo_mill5.jpg" alt="Extra image">
+    </div>
+  </div>
+
+  <!-- Right column (gray box) -->
+  <div class="right-content">
+    <h2>Caliper Attachment Mill Project</h2>
+   <div class="image-container">
+      <img src="photos/photo_mill12.jpg" alt="Extra image">
+    </div>
+    <h2>The Problem</h2>
+    <p>During this project, I used a Prototrak Mill to produce an attachment for a set of vernier calipers. This attachment allows the user to measure the depth of holes with a wider diameter than a traditional set of calipers allows. To successfully complete this project, I had to redesign a part made for dial calipers in order to be able to attach to a set of modern digital calipers. This involved using a custom set of retaining screws and altering various dimensions based on the calipers.</p>
+
+    <h2>The Process</h2>
+    <p>To begin production of the part, I first began by cutting a block of aluminum down to size. I then faced both the top and bottom of the part, giving me a leveled surface to work from. The next step was cutting the trench the main body of the calipers would connect to. This trench had to be widened to support digital calipers. I then used a #21 drill to create two holes on either side of the channel. I then tapped each hole and inserted two screws. The screws were positioned precisely so that the overhang from their heads would clamp onto the calipers, holding them in the correct position when tightened. After finishing the remainder of the part, I placed it into a drill press and utilized a special tool to get a circular brush finish on the top and bottom surfaces.</p>
+
+    <h2>The Results</h2>
+    <p>The caliper attachment worked perfectly in the end, meeting all design requirements and manufacturing tolerances, allowing for the end user to easily measure the depth of holes larger than the factory end of the calipers. This project demonstrates my ability to produce parts successfully on a mill, by proving I can manufacture parts that meet all design / functional requirements and tolerances.</p>
+<div class="image-container">
+      <img src="photos/photo_mill10.jpg" alt="Extra image">
+    </div>
+
+ 
+</div>
+</div>
+</div>
+
+</div>
+
+
+</body>
+</html>
