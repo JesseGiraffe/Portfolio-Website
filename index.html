@@ -177,10 +177,12 @@
 <div class="window" style="position: absolute;
 
       top: 50px;
-     bottom: 10%;
       left: 20%;
       width: 60%;
+      
     margin: 20px;
+      height: clamp(300px, 80vh, 750px);
+    max-height: 1000px;
       min-width: 400px;
       min-height: 300px;
       max-width: 80%;
@@ -213,7 +215,7 @@
 </div>
 </div>
 <!--Image Gallery-->
-<div id="project-photos" class="window" style="margin-top: 45%;"  >
+<div id="project-photos" class="window" style="margin-top: min(800px, 90vh);"  >
 <div>
 <div class="titlebar">
   <div class="title-bar">
