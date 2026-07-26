@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF</title>
+<link rel="stylesheet" href="system.css" />
+<style>
+  /* ===== MULTI-PAGE PDF VIEW =====
+     iOS WebKit renders only the FIRST page of a PDF shown in a frame, and
+     gives it no scrolling. It does honour the #page=N fragment, though —
+     so one frame per page, stacked, produces the whole document.
+
+     The file served is still the original .pdf; nothing is converted. The
+     browser fetches it once and serves the rest of the frames from cache.
+
+     Desktop never gets here: it keeps the native single-frame viewer with
+     its toolbar, search and download. See targetFor() in index.html. */
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: sans-serif;
+  }
+
+  .pages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pages .image-container { padding: 0; }
+
+  .page {
+    display: block;
+    width: 100%;
+    /* US Letter; the ratio query param overrides it per document. */
+    aspect-ratio: 612 / 792;
+    border: 0;
+    background: #fff;
+  }
+</style>
+<!-- Frutiger Aero skin - loaded last so it overrides the styles above -->
+<link rel="stylesheet" href="theme.css" />
+</head>
+<body>
+
+<div class="pages" id="pages"></div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const file  = params.get('file') || '';
+  const ratio = params.get('ratio');
+  const pages = Math.min(Math.max(parseInt(params.get('pages'), 10) || 1, 1), 60);
+
+  // Only ever point at a PDF beside this page — never an arbitrary URL
+  // handed to us in the query string.
+  const safe = /^[\w./-]+\.pdf$/i.test(file) && !file.includes('..');
+  const host = document.getElementById('pages');
+
+  if (safe) {
+    for (let n = 1; n <= pages; n++) {
+
+      const shell = document.createElement('div');
+      shell.className = 'image-container';
+
+      const frame = document.createElement('iframe');
+      frame.className = 'page';
+      frame.setAttribute('title', 'Page ' + n + ' of ' + pages);
+      frame.setAttribute('loading', n > 2 ? 'lazy' : 'eager');
+      if (ratio) frame.style.aspectRatio = ratio;
+      frame.src = file + '#page=' + n + '&view=Fit';
+
+      shell.appendChild(frame);
+      host.appendChild(shell);
+    }
+  }
+</script>
+
+</body>
+</html>

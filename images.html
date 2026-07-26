@@ -5,105 +5,182 @@
   <style>
     body {
       display: flex;
-      justify-content: center;
-      align-items: center;
       flex-direction: column;
+      align-items: center;
       font-family: sans-serif;
       overflow: hidden;
+      margin: 0;
+      padding: 0 0 8px;
     }
-    h1 { color: coral; }
 
+    /* The polaroid frame below is the BASE layer, i.e. the classic look.
+       theme.css loads after this file and overrides every one of these
+       properties, so the glass skin wins while it is enabled — and when
+       the floppy toggle disables it, the classic styling reappears on its
+       own. Layout properties are deliberately kept out of the override
+       path so the grid survives in both skins. */
+
+    h1 {
+      margin: 14px 0 16px;
+      font-size: 1.15rem;
+      text-align: center;
+      color: coral;
+    }
+
+    /* ===== GALLERY GRID =====
+       Six columns x two rows = 12 cells, filled exactly:
+         - the lamp is a 1x2 tile pinned to the right-hand column
+         - one landscape tile spans 2 columns to absorb the odd cell
+         - the remaining 8 tiles take one cell each
+       That is what keeps the block a clean rectangle with no holes. If a
+       project is ever added or removed, the counts change and the spans
+       below need revisiting.
+
+       Row height is a fixed px value on purpose: index.html measures this
+       document to size the iframe, so a vh-based height here would feed
+       back into its own input. */
     .grid-container {
-      columns: 5 200px;
-      column-gap: 1.5rem;
-      width: 90%;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-auto-rows: 190px;
+      gap: 12px;
+      width: 100%;
+      max-width: 1240px;
       margin: 0 auto;
+      padding: 0 16px 16px;
+      box-sizing: border-box;
     }
-    .grid-container div {
-      width: 100%;
-      margin-bottom: 1.5rem;
-      display: inline-block;
-      border: solid 2px black;
-      padding: 5px;
-      box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
-      border-radius: 5px;
-      transition: all .25s ease-in-out;
-    }
-    .grid-container div:hover { border-color: coral; }
-    .grid-container img {
-      width: 100%;
-      border-radius: 5px;
-      transition: all .25s ease-in-out;
+
+    .grid-container > div {
+      /* layout — kept in both skins */
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
       cursor: pointer;
+
+      /* polaroid frame — theme.css replaces all of these in the glass skin */
+      background: #fff;
+      border: solid 2px black;
+      border-radius: 5px;
+      padding: 5px;
+      box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+      transition: all .25s ease-in-out;
     }
+
+    .grid-container > div:hover { border-color: coral; }
+
+    /* Fills its cell at a constant height; aspect differences are cropped
+       rather than pushing the rows out of alignment. */
+    .grid-container img {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      border-radius: 5px;                /* squared off by theme.css */
+      transition: all .25s ease-in-out;
+    }
+
     .grid-container p {
-      margin: 5px 0;
+      flex: 0 0 auto;
+      margin: 6px 0 0;
       padding: 0;
       text-align: center;
-      font-style: italic;
+      font-size: .78rem;
+      line-height: 1.25;
+      overflow: hidden;
+      font-style: italic;                /* set to normal by theme.css */
+    }
+
+    /* The wide tile that closes the rectangle. */
+    .span-wide { grid-column: span 2; }
+
+    /* Lamp: right-hand column, full height of both rows. Explicitly placed
+       so it lands on the right regardless of its position in the markup. */
+    .span-tall {
+      grid-column: 6;
+      grid-row: 1 / span 2;
+    }
+
+    /* 4 x 3 also divides evenly into 12, so the rectangle survives. */
+    @media (max-width: 900px) {
+      .grid-container { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .span-tall { grid-column: 4; grid-row: 1 / span 2; }
+    }
+
+    /* Too narrow for spans to be worth it — 10 even tiles, 2 x 5. */
+    @media (max-width: 620px) {
+      .grid-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: 165px;
+      }
+      .span-wide,
+      .span-tall {
+        grid-column: auto;
+        grid-row: auto;
+      }
     }
   </style>
+<!-- Frutiger Aero skin - loaded last so it overrides the styles above -->
+<link rel="stylesheet" href="theme.css" />
 </head>
 <body>
 <h1>Click Each Photo to Learn More!</h1>
 
 <div class="grid-container">
-  <div>
-    <img src="photos/photo_ipad1.png" alt="iPad Stand Redesign (FEA with SOLIDWORKS)" data-iframe="iPad_embed.html">
+  <div class="span-wide">
+    <img src="photos/photo_ipad1.png" alt="iPad Stand Redesign (FEA with SOLIDWORKS)" data-slug="ipad-stand">
     <p>iPad Stand Redesign (FEA with SOLIDWORKS)</p>
   </div>
   <div>
-    <img src="photos/photo_chair1.jpg" alt="Cardboard Chair Project" data-iframe="chair_embed.html">
+    <img src="photos/photo_chair1.jpg" alt="Cardboard Chair Project" data-slug="chair">
     <p>Cardboard Chair Project</p>
   </div>
   <div>
-    <img src="photos/SpriteLite.png" alt="Lamp Project (SpriteLite)" data-iframe="lamp_embed.html">
-    <p>(SpriteLite) Lamp Project</p>
-  </div>
-  <div>
-    <img src="photos/photo_box1.jpg" alt="Mechatronics Storage Project" data-iframe="Mechatronics_embed.html">
+    <img src="photos/photo_box1.jpg" alt="Mechatronics Storage Project" data-slug="mechatronics">
     <p>Mechatronics Storage Project</p>
   </div>
   <div>
-    <img src="photos/photo_pinpunch2.jpg" alt="Lathe Project (Pinpunch)" data-iframe="pinpunch_embed.html">
+    <img src="photos/photo_pinpunch2.jpg" alt="Lathe Project (Pinpunch)" data-slug="pinpunch">
     <p>Pinpunch (Lathe Project)</p>
   </div>
   <div>
-    <img src="photos/photo_caliper1.jpg" alt="Mill Project (Caliper Attachment)" data-iframe="caliper_embed.html">
+    <img src="photos/photo_caliper1.jpg" alt="Mill Project (Caliper Attachment)" data-slug="caliper">
     <p>Caliper Attachment (Mill Project)</p>
   </div>
   <div>
-    <img src="photos/photo_hanger1.png" alt="Folding Hanger Project" data-iframe="Hanger_embed.html">
+    <img src="photos/photo_hanger1.png" alt="Folding Hanger Project" data-slug="hanger">
     <p>Folding Hanger Project</p>
   </div>
   <div>
-    <img src="photos/photo_saw1.jpg" alt="Saw Handle Project" data-iframe="saw_embed.html">
+    <img src="photos/photo_saw1.jpg" alt="Saw Handle Project" data-slug="saw">
     <p>Saw Handle Redesign (Ergonomics)</p>
   </div>
   <div>
-    <img src="photos/Camara_Designs.png" alt="Action Camera Project" data-iframe="ActionCamara_embed.html">
+    <img src="photos/Camara_Designs.png" alt="Action Camera Project" data-slug="action-camera">
     <p>Action Camera Project</p>
   </div>
   <div>
-    <img src="photos/cnc_1.PNG" alt="CNC SOP and Inspection Report" data-iframe="CNC_Plan.pdf">
+    <img src="photos/cnc_1.PNG" alt="CNC SOP and Inspection Report" data-slug="cnc">
     <p>CNC Project</p>
+  </div>
+  <div class="span-tall">
+    <img src="photos/SpriteLite.png" alt="Lamp Project (SpriteLite)" data-slug="lamp">
+    <p>(SpriteLite) Lamp Project</p>
   </div>
 </div>
 
 <script>
-  document.querySelectorAll('img').forEach(img => {
+  document.querySelectorAll('img[data-slug]').forEach(img => {
     img.addEventListener('click', () => {
-      // Scroll parent window to the top
-      window.parent.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Update floating window iframe and title in the parent
-      const parentIframe = window.parent.document.querySelector('.window-pane iframe');
-      const parentTitle = window.parent.document.querySelector('.window .title');
-      if(parentIframe && parentTitle) {
-        const src = img.dataset.iframe || img.src;
-        parentIframe.src = src;
-        parentTitle.textContent = img.alt;
-      }
+      // Hand off to the parent's router rather than poking its DOM directly,
+      // so a gallery click produces a shareable URL and a history entry too.
+      window.parent.location.hash = '#/' + img.dataset.slug;
+      // No behavior named on purpose: the parent's scroll-behavior drives
+      // it, so this matches the menubar link and honours reduced-motion.
+      window.parent.scrollTo({ top: 0 });
     });
   });
 </script>

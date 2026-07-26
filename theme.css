@@ -1,0 +1,527 @@
+/* ============================================================
+   Modern gray glass theme — overrides system.css
+   Load AFTER system.css. In the embed pages load it after their
+   inline <style> too, so it wins at equal specificity.
+   Remove the <link> to fall back to the classic Mac look.
+
+   Flat translucency + heavy blur + hairline edges. No gloss
+   gradients, no rounded corners, no skeuomorphic chrome.
+
+   Light/dark is driven entirely by the custom properties below.
+   Default follows prefers-color-scheme; [data-theme] on <html>
+   overrides it. index.html stamps that attribute onto its own
+   <html> and onto each same-origin iframe document.
+   ============================================================ */
+
+/* ===== LIGHT (default) ======================================= */
+
+:root {
+  color-scheme: light;
+
+  --ink:      #1c2126;
+  --ink-soft: #5c656d;
+  --sel:      rgba(38, 45, 52, .86);   /* hover / selection fill */
+  --sel-ink:  #ffffff;
+
+  /* glass surfaces — opacity climbs with how much text sits on them */
+  --glass-chrome: rgba(255, 255, 255, .16);  /* window shell, menubar */
+  --glass-panel:  rgba(255, 255, 255, .30);  /* cards, thumbnails    */
+  --glass-read:   rgba(250, 251, 252, .58);  /* long-form text       */
+  --glass-menu:   rgba(248, 249, 250, .72);  /* dropdowns            */
+
+  --wash:       rgba(255, 255, 255, .14);  /* title bar             */
+  --wash-hover: rgba(255, 255, 255, .46);  /* raised hover state    */
+  --field:      rgba(255, 255, 255, .40);  /* inputs, buttons       */
+  --thumb:      rgba(255, 255, 255, .48);  /* scrollbar thumb       */
+  --thumb-hi:   rgba(255, 255, 255, .70);
+  --mv-bg:      rgba(255, 255, 255, .30);  /* <model-viewer> stage  */
+  --solid:      rgba(240, 242, 245, .94);  /* no-backdrop fallback  */
+
+  /* consumed by index.html for the desktop layer */
+  --pane:  rgba(255, 255, 255, .10);
+  --scrim: linear-gradient(180deg,
+             rgba(255, 255, 255, .20) 0%,
+             rgba(122, 130, 138, .32) 100%);
+  --scrim-filter: grayscale(85%) contrast(95%);
+
+  --blur-heavy: blur(40px) saturate(150%);
+  --blur-mid:   blur(28px) saturate(135%);
+
+  /* hairlines, not borders */
+  --edge:       rgba(255, 255, 255, .34);
+  --edge-quiet: rgba(255, 255, 255, .18);
+  --edge-dark:  rgba(28, 33, 38, .16);
+
+  --lift:   0 24px 64px rgba(12, 17, 22, .40);
+  --lift-s: 0 8px 26px rgba(12, 17, 22, .26);
+  --inner:  inset 0 1px 0 rgba(255, 255, 255, .42);
+
+  /* system.css reads these but never defined them, so the embed card
+     borders and window-pane grid silently rendered as nothing. */
+  --primary:   rgba(255, 255, 255, .30);
+  --secondary: rgba(255, 255, 255, .26);
+
+  /* One height for the menubar and every window title bar. Change it here
+     and all of them follow. */
+  --bar-h: 34px;
+
+  --ui: "Segoe UI Variable Display", "Segoe UI", Inter, Frutiger,
+        "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ===== DARK =================================================
+   Declared twice: once for devices set to dark with no explicit
+   choice, once for an explicit [data-theme="dark"]. Keep the two
+   blocks identical. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --ink:      #eef1f4;
+    --ink-soft: #b3bcc4;
+    --sel:      rgba(255, 255, 255, .24);
+    --sel-ink:  #ffffff;
+
+    /* Two tiers: chrome sits dark and recedes, content surfaces sit a
+       step lighter so text reads against the darkened wallpaper.
+       Alpha stays well under full so the blur still shows through. */
+    --glass-chrome: rgba(42, 47, 53, .54);
+    --glass-panel:  rgba(64, 70, 77, .50);
+    --glass-read:   rgba(64, 70, 77, .58);
+    --glass-menu:   rgba(46, 52, 58, .80);
+
+    --wash:       rgba(255, 255, 255, .07);
+    --wash-hover: rgba(255, 255, 255, .16);
+    --field:      rgba(255, 255, 255, .10);
+    --thumb:      rgba(255, 255, 255, .34);
+    --thumb-hi:   rgba(255, 255, 255, .52);
+    --mv-bg:      rgba(64, 70, 77, .50);
+    --solid:      rgba(56, 62, 68, .96);
+
+    --pane: rgba(42, 47, 53, .30);
+
+    /* Wallpaper is dimmed in dark mode so the glass panels read as lit
+       surfaces against it. */
+    --scrim: linear-gradient(180deg,
+               rgba(12, 15, 18, .60) 0%,
+               rgba(6, 8, 10, .76) 100%);
+    --scrim-filter: grayscale(90%) contrast(90%) brightness(.70);
+
+    --edge:       rgba(255, 255, 255, .24);
+    --edge-quiet: rgba(255, 255, 255, .13);
+    --edge-dark:  rgba(255, 255, 255, .18);
+
+    --lift:   0 24px 64px rgba(0, 0, 0, .46);
+    --lift-s: 0 8px 26px rgba(0, 0, 0, .34);
+    --inner:  inset 0 1px 0 rgba(255, 255, 255, .14);
+
+    --primary:   rgba(255, 255, 255, .14);
+    --secondary: rgba(255, 255, 255, .12);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ink:      #eef1f4;
+  --ink-soft: #b3bcc4;
+  --sel:      rgba(255, 255, 255, .24);
+  --sel-ink:  #ffffff;
+
+  /* Two tiers: chrome sits dark and recedes, content surfaces sit a
+     step lighter so text reads against the darkened wallpaper.
+     Alpha stays well under full so the blur still shows through. */
+  --glass-chrome: rgba(42, 47, 53, .54);
+  --glass-panel:  rgba(64, 70, 77, .50);
+  --glass-read:   rgba(64, 70, 77, .58);
+  --glass-menu:   rgba(46, 52, 58, .80);
+
+  --wash:       rgba(255, 255, 255, .07);
+  --wash-hover: rgba(255, 255, 255, .16);
+  --field:      rgba(255, 255, 255, .10);
+  --thumb:      rgba(255, 255, 255, .34);
+  --thumb-hi:   rgba(255, 255, 255, .52);
+  --mv-bg:      rgba(64, 70, 77, .50);
+  --solid:      rgba(56, 62, 68, .96);
+
+  --pane: rgba(42, 47, 53, .30);
+
+  /* Wallpaper is dimmed in dark mode so the glass panels read as lit
+     surfaces against it. */
+  --scrim: linear-gradient(180deg,
+             rgba(12, 15, 18, .60) 0%,
+             rgba(6, 8, 10, .76) 100%);
+  --scrim-filter: grayscale(90%) contrast(90%) brightness(.70);
+
+  --edge:       rgba(255, 255, 255, .24);
+  --edge-quiet: rgba(255, 255, 255, .13);
+  --edge-dark:  rgba(255, 255, 255, .18);
+
+  --lift:   0 24px 64px rgba(0, 0, 0, .46);
+  --lift-s: 0 8px 26px rgba(0, 0, 0, .34);
+  --inner:  inset 0 1px 0 rgba(255, 255, 255, .14);
+
+  --primary:   rgba(255, 255, 255, .14);
+  --secondary: rgba(255, 255, 255, .12);
+}
+
+/* ===== TYPOGRAPHY ============================================= */
+
+body {
+  font-family: var(--ui);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .heading {
+  font-family: var(--ui);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+h1 { font-size: 1.3em; }
+h2 { font-size: 1.35em; }
+
+a { color: var(--ink); text-underline-offset: 2px; }
+
+/* Embed pages sit inside an iframe — a transparent document lets the
+   desktop wallpaper show through the window's glass. index.html
+   re-declares its own wallpaper after this file, so it keeps it. */
+html, body {
+  background: transparent;
+}
+
+/* ===== WINDOW ================================================= */
+
+.window {
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  backdrop-filter: var(--blur-heavy);
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  box-shadow: var(--lift), var(--inner);
+  font-family: var(--ui);
+}
+
+/* ===== TITLE BAR ==============================================
+   A hairline-separated strip, title left-aligned. */
+
+.title-bar,
+.inactive-title-bar {
+  background: var(--wash);
+  border-bottom: 1px solid var(--edge-quiet);
+  box-shadow: none;
+  border-radius: 0;
+  height: var(--bar-h);       /* same height as the menubar */
+  min-height: var(--bar-h);
+  margin: 0;
+  padding: 0;
+  align-items: stretch;       /* so the nav buttons can fill the bar */
+}
+
+.title-bar .title,
+.inactive-title-bar .title {
+  background: transparent;
+  font-family: var(--ui);
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  line-height: 1;
+  color: var(--ink);
+  text-align: left;
+  align-self: center;
+  margin: 0;          /* system.css centres it with `margin: 0 auto` */
+  padding: 0 12px;
+}
+
+.inactive-title-bar .title { color: var(--ink-soft); }
+
+/* ===== MENU BAR =============================================== */
+
+ul[role="menu-bar"] {
+  background: var(--glass-chrome);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  backdrop-filter: var(--blur-heavy);
+  border-bottom: 1px solid var(--edge-quiet);
+  box-shadow: 0 1px 24px rgba(12, 17, 22, .22);
+  font-family: var(--ui);
+  font-size: .9rem;
+  font-weight: 500;
+  height: var(--bar-h);
+  align-items: stretch;   /* items fill the bar, so hover covers it fully */
+}
+
+ul[role="menu-bar"] > [role="menu-item"] {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 0;
+  margin: 0;
+  color: var(--ink);
+  transition: background .14s ease, color .14s ease;
+}
+
+ul[role="menu-bar"] > [role="menu-item"]:hover,
+ul[role="menu-bar"] > [role="menu-item"]:focus,
+ul[role="menu-bar"] > [role="menu-item"]:focus-within {
+  background: var(--sel);
+  box-shadow: none;
+  color: var(--sel-ink);
+}
+
+/* ===== DROPDOWN MENUS ========================================= */
+
+ul[role="menu"] {
+  background: var(--glass-menu);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  backdrop-filter: var(--blur-heavy);
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  box-shadow: var(--lift);
+  padding: 0;
+  margin-top: 0;
+  overflow: hidden;
+  font-family: var(--ui);
+  font-size: .9rem;
+}
+
+/* kills system.css's engraved vertical rule */
+ul[role="menu"]:before { display: none; }
+
+ul[role="menu"] > [role="menu-item"] > a,
+ul[role="menu"] > [role="menu-item"] > button {
+  border-radius: 0;
+  padding: 9px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background .14s ease, color .14s ease;
+}
+
+ul[role="menu"] > [role="menu-item"] > a:hover,
+ul[role="menu"] > [role="menu-item"] > a:focus,
+ul[role="menu"] > [role="menu-item"] > button:hover,
+ul[role="menu"] > [role="menu-item"] > button:focus {
+  background: var(--sel);
+  color: var(--sel-ink);
+}
+
+/* ===== BUTTONS ================================================ */
+
+.btn, .btn-default, .standard-button {
+  font-family: var(--ui);
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1px solid var(--edge);
+  border-image: none;
+  border-radius: 0;
+  padding: 9px 22px;
+  background: var(--field);
+  -webkit-backdrop-filter: var(--blur-mid);
+  backdrop-filter: var(--blur-mid);
+  box-shadow: var(--inner);
+  text-shadow: none;
+}
+
+.btn:hover, .btn-default:hover { background: var(--wash-hover); }
+
+.btn:active, .btn-default:active {
+  background: var(--sel);
+  box-shadow: none;
+  color: var(--sel-ink);
+  border-radius: 0;
+}
+
+/* ===== FORM FIELDS ============================================ */
+
+input, textarea, select {
+  font-family: var(--ui);
+  font-size: .9rem;
+  color: var(--ink);
+  background: var(--field);
+  -webkit-backdrop-filter: var(--blur-mid);
+  backdrop-filter: var(--blur-mid);
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  padding: 8px 11px;
+  box-shadow: none;
+}
+
+input:focus, textarea:focus {
+  background: var(--wash-hover);
+  color: var(--ink);
+  outline: 1px solid var(--edge);
+}
+
+/* ===== SCROLLBARS =============================================
+   system.css draws pixel-art arrows using selectors carrying two and
+   three pseudo-classes (::-webkit-scrollbar-button:vertical:start,
+   :vertical:start:decrement, …). A bare ::-webkit-scrollbar-button
+   loses to those on specificity regardless of load order, so every
+   variant has to be answered explicitly. */
+
+::-webkit-scrollbar,
+.window-pane::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece,
+.window-pane::-webkit-scrollbar-track {
+  background: var(--wash);
+  border: none;
+  border-left: 1px solid var(--edge-quiet);
+}
+
+::-webkit-scrollbar-thumb,
+.window-pane::-webkit-scrollbar-thumb {
+  background: var(--thumb);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+::-webkit-scrollbar-thumb:hover,
+.window-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hi);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Match system.css selector for selector so these actually win. */
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:vertical:start,
+::-webkit-scrollbar-button:vertical:end,
+::-webkit-scrollbar-button:horizontal:start,
+::-webkit-scrollbar-button:horizontal:end,
+::-webkit-scrollbar-button:vertical:start:active,
+::-webkit-scrollbar-button:vertical:end:active,
+::-webkit-scrollbar-button:horizontal:start:active,
+::-webkit-scrollbar-button:horizontal:end:active,
+::-webkit-scrollbar-button:vertical:start:decrement,
+::-webkit-scrollbar-button:vertical:end:increment,
+::-webkit-scrollbar-button:horizontal:start:decrement,
+::-webkit-scrollbar-button:horizontal:end:increment,
+.window-pane::-webkit-scrollbar-button {
+  display: none;
+  background-image: none;
+  background-color: transparent;
+  width: 0;
+  height: 0;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--thumb) transparent;
+}
+
+/* ===== EMBED PAGE CARDS =======================================
+   The project pages build .image-container / .model-container /
+   .right-content cards; make them frosted instead of #f0f0f0. */
+
+.image-container,
+.model-container {
+  background: var(--glass-panel);
+  -webkit-backdrop-filter: var(--blur-mid);
+  backdrop-filter: var(--blur-mid);
+  border: 1px solid var(--edge-quiet);
+  border-radius: 0;
+  box-shadow: var(--lift-s);
+  padding: 7px;
+  overflow: hidden;
+}
+
+.image-container img {
+  border-radius: 0;
+  display: block;
+}
+
+.model-container model-viewer {
+  border-radius: 0;
+  background-color: var(--mv-bg);
+  overflow: hidden;
+}
+
+/* Long-form copy needs more backing than the chrome does. */
+.right-content {
+  background: var(--glass-read);
+  -webkit-backdrop-filter: var(--blur-heavy);
+  backdrop-filter: var(--blur-heavy);
+  border: 1px solid var(--edge);
+  border-radius: 0;
+  box-shadow: var(--lift-s), var(--inner);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.right-content h2 {
+  margin-top: 0;
+  padding-bottom: .35em;
+  border-bottom: 1px solid var(--edge-dark);
+  color: var(--ink);
+}
+
+.right-content h2 + h2 { margin-top: 1.4em; }
+
+/* ===== GALLERY (images.html) ================================== */
+
+.grid-container > div {
+  background: var(--glass-panel);
+  -webkit-backdrop-filter: var(--blur-mid);
+  backdrop-filter: var(--blur-mid);
+  border: 1px solid var(--edge-quiet);
+  border-radius: 0;
+  box-shadow: var(--lift-s);
+  padding: 7px;
+  transition: transform .18s ease, box-shadow .18s ease,
+              background .18s ease, border-color .18s ease;
+}
+
+.grid-container > div:hover {
+  transform: translateY(-3px);
+  background: var(--wash-hover);
+  border-color: var(--edge);
+  box-shadow: var(--lift);
+}
+
+.grid-container img { border-radius: 0; }
+
+.grid-container p {
+  font-family: var(--ui);
+  font-style: normal;
+  font-weight: 600;
+  font-size: .85rem;
+  letter-spacing: .01em;
+  color: var(--ink);
+}
+
+/* ===== ACCESSIBILITY / FALLBACKS ============================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-container > div,
+  ul[role="menu-bar"] > [role="menu-item"],
+  ul[role="menu"] > [role="menu-item"] > a {
+    transition: none;
+  }
+  .grid-container > div:hover { transform: none; }
+}
+
+/* This theme leans hard on backdrop-filter. Without it the panels are
+   near-invisible washes over a photo, so fall back to opaque. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .window,
+  ul[role="menu-bar"],
+  ul[role="menu"],
+  .right-content,
+  .image-container,
+  .model-container,
+  .grid-container > div,
+  .btn, input, textarea, select { background: var(--solid); }
+}

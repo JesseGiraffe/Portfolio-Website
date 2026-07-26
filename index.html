@@ -8,6 +8,24 @@
   <title>Jesse Santoro</title>
   <link rel="icon" href="photos/Giraffe icon.png"/>
   <link rel="stylesheet" href="system.css" />
+  <link rel="stylesheet" href="theme.css" id="themeSkin" />
+
+  <!-- Apply stored choices before first paint, otherwise the page renders
+       one way and visibly flips. No stored theme means we let
+       prefers-color-scheme decide, so there's nothing to do for that. -->
+  <script>
+    try {
+      var t = localStorage.getItem('theme');
+      if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+
+      // Classic skin = theme.css switched off, leaving plain system.css.
+      if (localStorage.getItem('skin') === 'classic') {
+        document.documentElement.dataset.skin = 'classic';
+        var l = document.getElementById('themeSkin');
+        if (l) l.disabled = true;
+      }
+    } catch (e) {}
+  </script>
 
   <style>
     /* ===== GLOBAL ===== */
@@ -17,26 +35,39 @@
       font-family: sans-serif;
     }
 
-    .test {
-      margin-top: 1000px;
+    /* Anchor jumps — the menubar's View Gallery link — glide instead of
+       snapping. This also governs scrollTo() calls that don't name a
+       behavior, so the gallery's own photo clicks run through the same
+       setting rather than hardcoding their own. */
+    html {
+      scroll-behavior: smooth;
     }
 
-    .gallery_title {
-      margin-top: 45%;
-      background: white;
-      border: black;
-      border-radius: 0.1;
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
     }
-    
 
+    /* ===== DESKTOP WALLPAPER ===== */
     body {
-      background: #D3D3D3;
-      padding-top: 25px;
-      background-image: url(photos/IMG_3719.jpg);
-      background-attachment: fixed;
-      background-position: 100%;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
+      padding-top: calc(var(--bar-h) + 10px);   /* clears the fixed menubar */
+      min-height: 100%;
+      background:
+        url(photos/IMG_3719.jpg) center / cover no-repeat fixed,
+        #9aa3ab;
+    }
+
+    /* Desaturates and evens out the photo so the gray glass reads
+       against it — no need to touch the image file. Sits above the
+       wallpaper, behind every window (z-index: -1). */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: var(--scrim);
+      -webkit-backdrop-filter: var(--scrim-filter);
+      backdrop-filter: var(--scrim-filter);
     }
 
     .icon {
@@ -62,16 +93,14 @@
 
     /* ===== CONTENT AREA ===== */
     .window-pane {
-      background: linear-gradient(90deg, var(--primary) 21px, transparent 1%) center,
-                  linear-gradient(var(--primary) 21px, transparent 1%) center,
-                  var(--secondary);
-      background-size: 22px 22px;
+      background: var(--pane);
+      -webkit-backdrop-filter: blur(24px) saturate(135%);
+      backdrop-filter: blur(24px) saturate(135%);
       flex: 1;
       display: flex;
       padding: 0;
       overflow: hidden;
       position: relative;
-    
     }
 
     /* ===== IFRAME ===== */
@@ -96,32 +125,256 @@
       display: none;
     }
 
-    /* ===== MENUBAR ===== */
+    /* ===== MENUBAR =====
+       The old scale(1.5) pushed the bar 50% past the viewport edge;
+       sizing it with font-size instead keeps it flush. */
     .menubar {
-      
-      transform: scale(1.5);
-      transform-origin: top left;
       margin: 0;
-      padding-bottom: 20px;
+      padding: 0 8px;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
+      box-sizing: border-box;
       z-index: 1000;
       user-select: none;
-      opacity: 90%;
+    }
+
+    /* ===== BOTTOM BAR =====
+       Same role="menu-bar" element as the top bar, so it inherits the
+       glass, classic and dark styling for free. Static rather than fixed,
+       so you reach it by scrolling to the end of the page.
+
+       80% of the top bar's height. This has to out-specify theme.css's
+       `ul[role="menu-bar"] { height: var(--bar-h) }` (0,1,1), hence the
+       tag + attribute + class selector. The var() fallback keeps it
+       working in the classic skin, where --bar-h goes away with
+       theme.css. */
+    ul[role="menu-bar"].menubar-bottom {
+      height: calc(var(--bar-h, 34px) * .8);
+      min-height: calc(var(--bar-h, 34px) * .8);
+      align-items: center;
+      justify-content: center;    /* contents centred, not left-aligned */
+      margin: 40px 0 28px;        /* trailing gap so it isn't flush to the edge */
+      width: 100%;
+      box-sizing: border-box;
+      font-size: .78rem;
+    }
+
+    ul[role="menu-bar"].menubar-bottom > [role="menu-item"] {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      line-height: 1;
+    }
+
+    .menubar-bottom a {
+      display: flex;
+      align-items: center;
+      color: inherit;             /* so hover inverts with the item */
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    /* currentColor rather than a grayscale image: the mark then takes the
+       bar's text colour, so it reads correctly in classic, light and dark
+       without shipping three versions. */
+    .menubar-bottom .social-icon {
+      display: block;
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
     }
 
     /* ===== RESIZER ===== */
     .resizer {
-      width: 12px;
-      height: 12px;
-      background: var(--secondary);
+      width: 14px;
+      height: 14px;
+      background: linear-gradient(135deg,
+        transparent 0 50%, rgba(255, 255, 255, .55) 50%);
+      border: none;
       position: absolute;
       right: 0;
       bottom: 0;
       cursor: se-resize;
       z-index: 10;
+    }
+
+    /* ===== WINDOW NAV (prev / next) =====
+       Scoped as `.title-bar .nav-btn` on purpose: system.css styles
+       `.title-bar button` as a 40px Mac widget and would otherwise win
+       on specificity. */
+    .window-nav {
+      margin-left: auto;
+      display: flex;
+      flex: none;
+    }
+
+    /* Full bar height, like the menubar items, so the hover fill reads as
+       part of the bar rather than a floating chip. */
+    .title-bar .nav-btn {
+      all: unset;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 100%;
+      flex: none;
+      cursor: pointer;
+      color: var(--ink);
+      border-left: 1px solid var(--edge-quiet);
+      transition: background .14s ease, color .14s ease;
+    }
+
+    .title-bar .nav-btn + .nav-btn { margin-left: 0; }
+
+    .title-bar .nav-btn:hover,
+    .title-bar .nav-btn:focus-visible {
+      background: var(--sel);
+      color: var(--sel-ink);
+    }
+
+    .title-bar .nav-btn svg { display: block; }
+
+    /* ===== THEME TOGGLE =====
+       margin-left:auto pushes it to the right end of the flex menubar. */
+    .theme-item {
+      margin-left: auto;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .theme-toggle {
+      all: unset;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 100%;
+      cursor: pointer;
+      color: var(--ink);
+      transition: background .14s ease, color .14s ease;
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible {
+      background: var(--sel);
+      color: var(--sel-ink);
+    }
+
+    .theme-toggle svg { display: block; }
+
+    /* Show the icon for the mode you'd switch TO. */
+    .theme-toggle .icon-sun { display: none; }
+    :root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+    :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
+      :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+    }
+
+    /* ===== CLASSIC SKIN =====
+       The floppy button disables theme.css. Everything it styled reverts
+       to system.css on its own, but the glass that lives in THIS file has
+       to be undone here or the page ends up half and half.
+
+       Rules using var(--…) need no counterpart: with theme.css off those
+       custom properties are undefined, so the declarations are simply
+       dropped. Only the hardcoded glass below needs reverting. */
+    :root[data-skin="classic"] body {
+      padding-top: 32px;                /* --bar-h is gone with theme.css */
+    }
+
+    :root[data-skin="classic"] body::before { display: none; }
+
+    :root[data-skin="classic"] .window-pane {
+      background: #fff;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    /* The original had an invisible corner grip here — the visible white box
+       was my addition, and it sits on top of the scrollbar. Back to
+       invisible, but still present so the corner stays draggable. */
+    :root[data-skin="classic"] .resizer {
+      background: none;
+      border: none;
+    }
+
+    /* Firefox ignores ::-webkit-scrollbar entirely, so system.css's pixel-art
+       arrows never appear there — it only implements scrollbar-width and
+       scrollbar-color. This is the closest approximation: a 1-bit white
+       thumb on a dark track, so Firefox at least doesn't drop a modern grey
+       scrollbar into the middle of a System 7 interface. Chromium ignores
+       these two properties in favour of system.css's own rules, so it costs
+       nothing there.
+
+       theme.css already does the equivalent for the glass skin; this only
+       covers classic, where theme.css is switched off. */
+    :root[data-skin="classic"] * {
+      scrollbar-width: auto;
+      scrollbar-color: #ffffff #000000;
+    }
+
+    /* Modern-only controls, hidden while the classic skin is active:
+       the light/dark toggle (system.css has no dark mode) and the ‹ ›
+       arrows (the classic title bar has its own widgets instead). The
+       floppy itself stays, or there'd be no way back. */
+    :root[data-skin="classic"] #themeToggle { display: none; }
+    :root[data-skin="classic"] .window-nav { display: none; }
+
+    /* Mac-era chrome — the close/resize widgets and the "items / in disk /
+       available" strip. Present in the markup at all times, shown only in
+       the classic skin.
+
+       The HIDE rules must out-specify system.css's own
+       `.title-bar button { display: block }`, which is (0,1,1). A bare
+       `.classic-only` is (0,1,0) and loses to it no matter how late it
+       loads, so each element type is named explicitly here too.
+
+       The SHOW rules restore display per element type rather than using
+       `revert`, because the values needed (block, flex) come from
+       system.css — author origin, which is not what revert returns. */
+    .classic-only,
+    .title-bar button.classic-only,
+    .details-bar.classic-only {
+      display: none;
+    }
+
+    :root[data-skin="classic"] .title-bar button.classic-only { display: block; }
+    :root[data-skin="classic"] .details-bar.classic-only { display: flex; }
+
+    /* ===== GALLERY WINDOW =====
+       Height is driven by the iframe's real content height (see JS), so
+       there's no dead space below the grid and no nested scrollbar. */
+    #project-photos .window-pane {
+      height: auto;
+      display: block;
+      overflow: hidden;
+    }
+
+    #project-photos .window-pane iframe {
+      height: auto;
+      display: block;
+    }
+
+    /* ===== MOBILE =====
+       Last block in the file so it wins over everything above it. */
+    @media (max-width: 768px) {
+
+      /* Taller bar so the controls clear the ~44px minimum touch target.
+         --bar-h drives the menubar AND both window title bars in theme.css,
+         so overriding it here resizes all of them together. */
+      :root { --bar-h: 46px; }
+
+      /* Bigger tap targets, tighter menu padding to claw back the width. */
+      .theme-toggle { width: 52px; }
+      .title-bar .nav-btn { width: 42px; }
+
+      ul[role="menu-bar"] > [role="menu-item"] { padding: 0 11px; }
     }
   </style>
   
@@ -143,31 +396,24 @@
   <li role="menu-item" tabindex="0" aria-haspopup="true">
     About
     <ul role="menu">
-      <li role="menu-item">
-        <a href="#menu" data-iframe="About_embed.html" data-title="About Me">About Me</a>
-         <a href="#menu" data-iframe="files/Jesse_Santoro_Resume.pdf" data-title="Resume">Resume</a>
-      </li>
+      <li role="menu-item"><a href="#/about">About Me</a></li>
+      <li role="menu-item"><a href="#/resume">Resume</a></li>
     </ul>
   </li>
 
   <li role="menu-item" tabindex="0" aria-haspopup="true">
     Projects
     <ul role="menu">
-      <li role="menu-item"><a href="#menu" data-iframe="iPad_embed.html" data-title="iPad Stand Project">iPad Stand (SOLIDWORKS Simulation)</a></li>
-            <li role="menu-item"><a href="#menu" data-iframe="CNC_Plan.pdf" data-title="CNC SOP and Inspection Report">CNC Project</a></li>
-
-            <li role="menu-item"><a href="#menu" data-iframe="caliper_embed.html" data-title="Caliper Attachment (Mill Project)">Caliper Attachment (Mill Project)</a></li>
-      <li role="menu-item"><a href="#menu" data-iframe="Mechatronics_embed.html" data-title="Mechatronics Storage Project">Mechatronics Storage</a></li>
-                 <li role="menu-item"><a href="#menu" data-iframe="ActionCamara_embed.html" data-title="Action Camera Project">Action Camera</a></li>
-                  <li role="menu-item"><a href="#menu" data-iframe="pinpunch_embed.html" data-title="Pinpunch (Lathe Project)">Pinpunch (Lathe Project)</a></li>
-                        <li role="menu-item"><a href="#menu" data-iframe="Hanger_embed.html" data-title="Folding Hanger">Folding Hanger Project</a></li>
-      <li role="menu-item"><a href="#menu" data-iframe="lamp_embed.html" data-title="Lamp Project">Lamp Project</a></li>
-      <li role="menu-item"><a href="#menu" data-iframe="chair_embed.html" data-title="Chair Project">Chair Project</a></li>
-      <li role="menu-item"><a href="#menu" data-iframe="saw_embed.html" data-title="Saw Handle Project">Saw Handle Project</a></li>
-
-    
-
-    
+      <li role="menu-item"><a href="#/ipad-stand">iPad Stand (SOLIDWORKS Simulation)</a></li>
+      <li role="menu-item"><a href="#/cnc">CNC Project</a></li>
+      <li role="menu-item"><a href="#/caliper">Caliper Attachment (Mill Project)</a></li>
+      <li role="menu-item"><a href="#/mechatronics">Mechatronics Storage</a></li>
+      <li role="menu-item"><a href="#/action-camera">Action Camera</a></li>
+      <li role="menu-item"><a href="#/pinpunch">Pinpunch (Lathe Project)</a></li>
+      <li role="menu-item"><a href="#/hanger">Folding Hanger Project</a></li>
+      <li role="menu-item"><a href="#/lamp">Lamp Project</a></li>
+      <li role="menu-item"><a href="#/chair">Chair Project</a></li>
+      <li role="menu-item"><a href="#/saw">Saw Handle Project</a></li>
     </ul>
   </li>
 
@@ -177,6 +423,41 @@
     <li role="menu-item"><a href="#project-photos">View Gallery</a></li>
   </ul>
 </li>
+
+  <li class="theme-item">
+    <button type="button" id="themeToggle" class="theme-toggle"
+            aria-pressed="false" aria-label="Switch to dark mode"
+            title="Switch to dark mode">
+      <svg class="icon-moon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path fill="currentColor" d="M13.9 10.3A6.2 6.2 0 0 1 5.7 2.1a6.2 6.2 0 1 0 8.2 8.2z"/>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="8" cy="8" r="3.1" fill="currentColor"/>
+        <g stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <line x1="8" y1="1" x2="8" y2="2.6"/>
+          <line x1="8" y1="13.4" x2="8" y2="15"/>
+          <line x1="1" y1="8" x2="2.6" y2="8"/>
+          <line x1="13.4" y1="8" x2="15" y2="8"/>
+          <line x1="3.1" y1="3.1" x2="4.2" y2="4.2"/>
+          <line x1="11.8" y1="11.8" x2="12.9" y2="12.9"/>
+          <line x1="3.1" y1="12.9" x2="4.2" y2="11.8"/>
+          <line x1="11.8" y1="4.2" x2="12.9" y2="3.1"/>
+        </g>
+      </svg>
+    </button>
+
+    <button type="button" id="skinToggle" class="theme-toggle"
+            aria-pressed="false" aria-label="Switch to the classic Mac theme"
+            title="Classic Mac theme">
+      <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"
+           fill="none" stroke="currentColor" stroke-width="1.3"
+           stroke-linejoin="round">
+        <path d="M2.6 2.6h8.3l2.5 2.5v8.3H2.6z"/>
+        <path d="M5.4 2.6h5v3.5h-5z"/>
+        <path d="M4.6 9.3h6.8v4.1H4.6z"/>
+      </svg>
+    </button>
+  </li>
 
 </ul>
 
@@ -202,12 +483,28 @@
      " data-draggable id="draggableWindow">
 
   <div class="title-bar" id="titleBar">
-    <button aria-label="Close" class="close"></button>
+    <button aria-label="Close" class="close classic-only"></button>
     <h1 class="title">About Me</h1>
-    <button aria-label="Resize" class="resize"></button>
+    <div class="window-nav">
+      <button type="button" id="prevProject" class="nav-btn"
+              aria-label="Previous page" title="Previous">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M10 3 L5 8 L10 13" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button type="button" id="nextProject" class="nav-btn"
+              aria-label="Next page" title="Next">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path d="M6 3 L11 8 L6 13" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <button aria-label="Resize" class="resize classic-only"></button>
   </div>
 
-  <div class="details-bar">
+  <div class="details-bar classic-only">
     <span>16 items</span>
     <span>775k in disk</span>
     <span>4k available</span>
@@ -227,16 +524,16 @@
 <div>
 <div class="titlebar">
   <div class="title-bar">
-    <h1 class="title"> \/ !Scroll Down For Project Photo Gallery! \/ </h1>
-    
+    <h1 class="title">Project Photo Gallery</h1>
   </div>
-  <div class="details-bar">
+  <div class="details-bar classic-only">
     <span>16 items</span>
     <span>775k in disk</span>
     <span>4k available</span>
   </div>
-  <div class="window-pane" style="height: 2000px;">
-<iframe class="gallery_content"  src="images.html"></iframe>
+  <div class="window-pane">
+    <iframe class="gallery_content" id="galleryFrame" src="images.html"
+            scrolling="no"></iframe>
   </div>
  
 </div>
@@ -245,6 +542,22 @@
 
 </div>
 <div style="height: 20px;"></div>
+
+<!-- ===== BOTTOM BAR ===== -->
+<ul role="menu-bar" class="menubar-bottom">
+  <li role="menu-item">
+    <a href="mailto:js@jessesantoro.com">Contact: js@jessesantoro.com</a>
+  </li>
+  <li role="menu-item">
+    <a href="https://www.linkedin.com/in/jessesantoro" target="_blank"
+       rel="noopener noreferrer" aria-label="LinkedIn profile" title="LinkedIn">
+      <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.59 0 4.26 2.37 4.26 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/>
+      </svg>
+    </a>
+  </li>
+</ul>
+
 <script>
 
 const windowEl = document.querySelector('[data-draggable]');
@@ -302,26 +615,319 @@ document.addEventListener('mousemove', e => {
   }
 });
 
-/* ===== PROJECT TAB HANDLER ===== */
+/* ===== ROUTING =====
+   The URL hash is the source of truth for what's in the window, so every
+   project has a shareable link (index.html#/lamp) and Back/Forward work.
+   Menu links are plain <a href="#/slug"> — nothing intercepts the click. */
 
-document.querySelectorAll('[data-iframe]').forEach(link => {
 
-  link.addEventListener('click', e => {
+/* ===== PROJECT REGISTRY =====
 
-    e.preventDefault();
+   >>> ORDER MATTERS <<<
+   The order of the lines below sets the order the ‹ › arrows in the title
+   bar cycle through. To reorder the cycle, move a line up or down — that
+   is the only edit needed. Object.keys(PROJECTS) further down reads this
+   order at load time, so there is no second list to keep in sync.
 
-    const iframeSrc = link.dataset.iframe;
-    const windowTitle = link.dataset.title;
+   TWO EXCEPTIONS: 'about' is always forced to the front of the cycle and
+   'resume' always to the end, wherever their lines happen to sit. That is
+   pinned by FIRST_SLUG / LAST_SLUG in the PREV / NEXT section below —
+   change it there, not here.
 
-    const iframe = document.querySelector('.window-pane iframe');
-    const titleEl = document.querySelector('.window .title');
+   The MENUBAR order is separate: it comes from the <a href="#/slug">
+   links in the markup above, not from this object. Change both if you
+   want the menu and the arrow cycle to match.
 
-    iframe.src = iframeSrc;
-    titleEl.textContent = windowTitle;
+   To ADD a page:    add a line here, then add a menubar link.
+   To REMOVE a page: delete the line (and its menubar link). Any stale
+                     #/slug still floating around falls back to
+                     DEFAULT_SLUG instead of erroring.
 
+   key   -> the slug in the URL, i.e. index.html#/lamp
+   file  -> the page or PDF loaded into the window
+   title -> shown in the title bar and as the browser tab title          */
+
+const PROJECTS = {
+  'about':         { file: 'About_embed.html',                title: 'About Me' },
+  'resume':        { file: 'files/Jesse_Santoro_Resume.pdf',  title: 'Resume' },
+  'ipad-stand':    { file: 'iPad_embed.html',                 title: 'iPad Stand Project' },
+  'cnc':           { file: 'CNC_Plan.pdf',                    title: 'CNC SOP and Inspection Report' },
+  'caliper':       { file: 'caliper_embed.html',              title: 'Caliper Attachment (Mill Project)' },
+  'mechatronics':  { file: 'Mechatronics_embed.html',         title: 'Mechatronics Storage Project' },
+  'action-camera': { file: 'ActionCamara_embed.html',         title: 'Action Camera Project' },
+  'pinpunch':      { file: 'pinpunch_embed.html',             title: 'Pinpunch (Lathe Project)' },
+  'hanger':        { file: 'Hanger_embed.html',               title: 'Folding Hanger' },
+  'lamp':          { file: 'lamp_embed.html',                 title: 'Lamp Project' },
+  'chair':         { file: 'chair_embed.html',                title: 'Chair Project' },
+  'saw':           { file: 'saw_embed.html',                  title: 'Saw Handle Project' }
+};
+
+const DEFAULT_SLUG = 'about';
+
+const projectFrame = document.querySelector('.window-pane iframe');
+const projectTitle = document.querySelector('#draggableWindow .title');
+
+// Matches the iframe's hardcoded src, so the default route doesn't reload it.
+let current = PROJECTS[DEFAULT_SLUG];
+
+function show(slug) {
+
+  const project = PROJECTS[slug] || PROJECTS[DEFAULT_SLUG];
+
+  if (project !== current) {
+    // location.replace() rather than .src — assigning src pushes an entry onto
+    // THIS page's history, so Back would step through stale iframes instead of
+    // moving between routes. The catch covers PDFs blocking contentWindow.
+    try { projectFrame.contentWindow.location.replace(project.file); }
+    catch (err) { projectFrame.src = project.file; }
+    current = project;
+  }
+
+  projectTitle.textContent = project.title;
+  document.title = project.title + ' — Jesse Santoro';
+
+}
+
+/* Bring the window back into view when a project is opened. No behavior
+   is named, so the page's scroll-behavior drives it — the same setting
+   the gallery's photo clicks and the View Gallery link run through. */
+function scrollToWindow() {
+  window.scrollTo({ top: 0 });
+}
+
+function route(isInitial) {
+
+  // Only #/… are routes. Plain anchors (#project-photos) scroll and are ignored.
+  if (!location.hash.startsWith('#/')) {
+    if (isInitial) show(DEFAULT_SLUG);
+    return;
+  }
+
+  show(location.hash.slice(2));
+  if (!isInitial) scrollToWindow();   // don't fight the browser on first load
+
+}
+
+// Re-picking the project already loaded changes nothing about the hash, so
+// no hashchange fires — handle the click directly or that case does nothing.
+document.querySelectorAll('a[href^="#/"]').forEach(link => {
+  link.addEventListener('click', scrollToWindow);
+});
+
+window.addEventListener('hashchange', () => route(false));
+route(true);
+
+/* ===== PREV / NEXT ===== */
+
+/* Cycle order = FIRST_SLUG, then everything else in PROJECTS line order,
+   then LAST_SLUG. The two ends are pinned here so they hold no matter how
+   the registry above is reordered; the middle needs no maintenance because
+   Object.keys supplies both the sequence and the count.
+
+   To pin a different page to an end, change the two constants below.
+   To stop pinning entirely, set either to null.                          */
+
+const FIRST_SLUG = 'about';    // always the start of the cycle
+const LAST_SLUG  = 'resume';   // always the end of the cycle
+
+const SLUGS = [
+  FIRST_SLUG,
+  ...Object.keys(PROJECTS).filter(s => s !== FIRST_SLUG && s !== LAST_SLUG),
+  LAST_SLUG
+].filter(s => PROJECTS[s]);    // drops a pinned slug that no longer exists
+
+function currentSlug() {
+  const slug = location.hash.startsWith('#/') ? location.hash.slice(2) : '';
+  // An unknown slug (e.g. a route that was deleted from the registry but
+  // is still bookmarked) resolves to the default rather than breaking.
+  return PROJECTS[slug] ? slug : DEFAULT_SLUG;
+}
+
+function step(delta) {
+  if (!SLUGS.length) return;
+  const index = SLUGS.indexOf(currentSlug());
+  // Modulo wraps both directions, so the ends join up.
+  location.hash = '#/' + SLUGS[(index + delta + SLUGS.length) % SLUGS.length];
+}
+
+const prevBtn = document.getElementById('prevProject');
+const nextBtn = document.getElementById('nextProject');
+
+prevBtn.addEventListener('click', () => step(-1));
+nextBtn.addEventListener('click', () => step(1));
+
+// The title bar is the drag handle. Without this, pressing any button in it
+// also starts a window drag. Covers the arrows and, in the classic skin, the
+// close/resize widgets.
+titleBar.querySelectorAll('button').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.stopPropagation());
+});
+
+/* ===== THEME =====
+   No stored choice means prefers-color-scheme decides. Clicking stores
+   an explicit override on <html data-theme>; the same attribute is
+   stamped onto every same-origin iframe so the embeds follow along. */
+
+const THEME_KEY = 'theme';
+const root = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+function readPref() {
+  try {
+    const v = localStorage.getItem(THEME_KEY);
+    return (v === 'dark' || v === 'light') ? v : null;
+  } catch (err) { return null; }   // private mode / storage disabled
+}
+
+function writePref(value) {
+  try {
+    if (value) localStorage.setItem(THEME_KEY, value);
+    else localStorage.removeItem(THEME_KEY);
+  } catch (err) {}
+}
+
+function effectiveTheme() {
+  return readPref() || (darkQuery.matches ? 'dark' : 'light');
+}
+
+function stampFrame(frame) {
+  try {
+    const doc = frame.contentDocument;
+    if (!doc || !doc.documentElement) return;
+
+    const pref = readPref();
+    if (pref) doc.documentElement.dataset.theme = pref;
+    else delete doc.documentElement.dataset.theme;
+
+    // Each embed carries its own theme.css link, so the classic skin has
+    // to be switched off inside the iframe as well as out here.
+    const classic = isClassic();
+    if (classic) doc.documentElement.dataset.skin = 'classic';
+    else delete doc.documentElement.dataset.skin;
+
+    const link = doc.querySelector('link[href="theme.css"]');
+    if (link) link.disabled = classic;
+
+  } catch (err) {}   // cross-origin document or the native PDF viewer
+}
+
+function applyTheme() {
+
+  const pref = readPref();
+  if (pref) root.dataset.theme = pref;
+  else delete root.dataset.theme;   // fall back to prefers-color-scheme
+
+  const label = effectiveTheme() === 'dark'
+    ? 'Switch to light mode'
+    : 'Switch to dark mode';
+
+  themeToggle.setAttribute('aria-pressed', String(effectiveTheme() === 'dark'));
+  themeToggle.setAttribute('aria-label', label);
+  themeToggle.title = label;
+
+  document.querySelectorAll('iframe').forEach(stampFrame);
+
+}
+
+themeToggle.addEventListener('click', () => {
+  const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+  // If the pick matches the device setting, drop the override so the
+  // page goes back to following the device automatically.
+  writePref(next === (darkQuery.matches ? 'dark' : 'light') ? null : next);
+  applyTheme();
+});
+
+// Follow the device while no explicit choice is stored.
+darkQuery.addEventListener('change', applyTheme);
+
+// Each route swaps the iframe's document, so re-stamp on every load.
+document.querySelectorAll('iframe').forEach(frame => {
+  frame.addEventListener('load', () => stampFrame(frame));
+});
+
+/* ===== SKIN (glass / classic system.css) =====
+   The floppy button turns theme.css off, leaving the original system.css
+   look. system.css has no dark mode, so the light/dark toggle is hidden
+   while the classic skin is on (CSS handles the hiding). */
+
+const SKIN_KEY = 'skin';
+const themeLink = document.getElementById('themeSkin');
+const skinToggle = document.getElementById('skinToggle');
+
+function isClassic() {
+  try { return localStorage.getItem(SKIN_KEY) === 'classic'; }
+  catch (err) { return false; }
+}
+
+function applySkin() {
+
+  const classic = isClassic();
+
+  if (classic) root.dataset.skin = 'classic';
+  else delete root.dataset.skin;
+
+  if (themeLink) themeLink.disabled = classic;
+
+  const label = classic
+    ? 'Switch to the modern theme'
+    : 'Switch to the classic Mac theme';
+
+  skinToggle.setAttribute('aria-pressed', String(classic));
+  skinToggle.setAttribute('aria-label', label);
+  skinToggle.title = label;
+
+}
+
+skinToggle.addEventListener('click', () => {
+  try {
+    if (isClassic()) localStorage.removeItem(SKIN_KEY);
+    else localStorage.setItem(SKIN_KEY, 'classic');
+  } catch (err) {}
+  applySkin();
+  applyTheme();   // re-stamps the iframes for the new skin
+});
+
+applySkin();
+applyTheme();
+
+/* ===== GALLERY AUTO-HEIGHT =====
+   The pane used to be a hardcoded 2000px, which left dead space under
+   the grid and produced a nested scrollbar whenever it was trimmed.
+   Measure the real content instead and size the iframe to it. */
+
+const galleryFrame = document.getElementById('galleryFrame');
+
+function fitGallery() {
+  try {
+    const doc = galleryFrame.contentDocument;
+    if (!doc || !doc.body) return;
+    // body has overflow:hidden, so scrollHeight on the root is the honest one
+    const height = Math.max(doc.body.scrollHeight,
+                            doc.documentElement.scrollHeight);
+    if (height > 0) galleryFrame.style.height = height + 'px';
+  } catch (err) {}
+}
+
+galleryFrame.addEventListener('load', () => {
+
+  fitGallery();
+
+  const doc = galleryFrame.contentDocument;
+  if (!doc) return;
+
+  // The grid is CSS multi-column, so its height changes with width, and
+  // images settle after load. Re-measure on both.
+  if (window.ResizeObserver) {
+    new ResizeObserver(fitGallery).observe(doc.documentElement);
+  }
+  doc.querySelectorAll('img').forEach(img => {
+    if (!img.complete) img.addEventListener('load', fitGallery, { once: true });
   });
 
 });
+
+window.addEventListener('resize', fitGallery);
 
 </script>
 
