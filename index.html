@@ -816,6 +816,59 @@ document.querySelectorAll('a[href^="#/"]').forEach(link => {
 window.addEventListener('hashchange', () => route(false));
 route(true);
 
+/* ===== CLOSING THE MENUS =====
+   system.css shows a dropdown only while something inside it has focus
+   (:focus / :focus-within). With a mouse that works on its own: clicking
+   elsewhere moves focus. On a phone it doesn't - picking a link only
+   changes the hash, so focus stays on the link, and tapping blank page or
+   the project iframe never moves focus at all. So close them explicitly
+   by dropping focus from the menubar. */
+
+function closeMenus() {
+  const active = document.activeElement;
+  if (active && active.closest('ul[role="menu-bar"]')) active.blur();
+}
+
+// 1. Picking an item closes the menu.
+document.querySelectorAll('ul[role="menu"] a').forEach(link => {
+  link.addEventListener('click', closeMenus);
+});
+
+// 2. Tapping anywhere outside the menubar closes it...
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('ul[role="menu-bar"]')) closeMenus();
+});
+
+// ...including inside the iframes, whose taps never reach this document.
+// Re-attached on every load because each route swaps the iframe's document.
+function watchFrameTaps(frame) {
+  try { frame.contentDocument.addEventListener('pointerdown', closeMenus); }
+  catch (err) {}   // native PDF viewer: not reachable, nothing to do
+}
+
+document.querySelectorAll('iframe').forEach(frame => {
+  watchFrameTaps(frame);   // in case it finished loading before this ran
+  frame.addEventListener('load', () => watchFrameTaps(frame));
+});
+
+// 3. Tapping an open menu's title again closes it. Focus lands on the title
+//    between pointerdown and click, so whether it was ALREADY open has to be
+//    recorded at pointerdown, before that happens.
+document.querySelectorAll('ul[role="menu-bar"] > [role="menu-item"][aria-haspopup]').forEach(item => {
+  let wasOpen = false;
+  item.addEventListener('pointerdown', () => {
+    wasOpen = item.matches(':focus-within');
+  });
+  item.addEventListener('click', e => {
+    if (wasOpen && !e.target.closest('ul[role="menu"]')) closeMenus();
+  });
+});
+
+// 4. Escape closes it from the keyboard.
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeMenus();
+});
+
 /* ===== PREV / NEXT ===== */
 
 /* Cycle order = FIRST_SLUG, then everything else in PROJECTS line order,
