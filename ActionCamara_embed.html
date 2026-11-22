@@ -70,6 +70,7 @@
 </style>
 <!-- Frutiger Aero skin - loaded last so it overrides the styles above -->
 <link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="mobile.css" />
 </head>
 <body>
 
@@ -92,7 +93,8 @@ camera-orbit="119deg 96deg 0.188m"
         </div>
       </model-viewer>
     </div>
-    <div class="model-container">
+    <!-- mobile-top: shown above the text on phones (see mobile.css) -->
+    <div class="model-container mobile-top">
       <model-viewer
         src="models/OtomUpdatedV3.glb"
         ar

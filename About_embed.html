@@ -59,9 +59,26 @@
     max-height: 100%;
     overflow-y: auto; /* scroll only the right column */
   }
+
+  /* "Show email" button, styled as a plain link so it sits in the heading. */
+  .email-reveal {
+    all: unset;
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+  }
+
+  /* The link it turns into - blue to match the Resume link below it. */
+  .email-revealed { color: blue; }
+
+  .email-reveal:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
 </style>
 <!-- Frutiger Aero skin - loaded last so it overrides the styles above -->
 <link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="mobile.css" />
 </head>
 <body>
 
@@ -75,16 +92,33 @@
   <!-- Right column -->
   <div class="right-content">
     <h2>About Me</h2>
-    <h3>Contact: </h3>
-    <h3><a href="files/Jesse_Santoro_Resume.pdf" style="color: blue;">Resume</a></h3>
+    <!-- Address is assembled by email.js on click - see that file. -->
+    <h3>Contact: <button type="button" class="email-reveal" data-u="sj" data-h="moc.orotnasessej">Show email</button>
+      &nbsp;·&nbsp; <a href="files/Jesse_Santoro_Resume.pdf" data-route="resume" style="color: blue;">Resume</a></h3>
    
      <h3>Hello, I'm Jesse Santoro!</h3>
     <p>As an Engineer and Designer, I strive to focus on the small details without losing the overall big picture idea. When I develop a product, I prioritize its functionality, considering how it will integrate seamlessly into your life.</p>
     <p>I believe rather than adapting the user to the product, the product should adapt to the user. If I had to pinpoint some of my strongest skills, it would be developing CAD models and constructing functional prototypes.</p>
-    <p>Through my portfolio, I hope to demonstrate both my creativity and ,technical skills integrating both design and engineering to produce aesthetically pleasing and practical products.</p>
+    <p>Through my portfolio, I hope to demonstrate both my creativity and technical skills, integrating both design and engineering to produce aesthetically pleasing and practical products.</p>
     <p>I enjoy finding solutions to complex problems that involve bringing my ideas to life. I am detail-oriented and always focus on the small details without losing the bigger picture. I am not afraid to ask questions or investigate multiple approaches to determine the best solution.</p>
     <p>Ever since I was little, I’ve always been curious about how things work, and that motivated me to study engineering and design so that I can help to create those same things that always fascinated me.</p>
   </div>
+<script src="email.js"></script>
+<script>
+  /* Links with data-route open that page through the site's router
+     (index.html#/resume) rather than loading the file straight into this
+     frame. That way the resume gets the same treatment as the menu's
+     Resume link, including the all-pages PDF viewer on phones. The href
+     stays as the plain PDF, so it still works if this page is ever opened
+     on its own outside the site. */
+  document.querySelectorAll('a[data-route]').forEach(link => {
+    link.addEventListener('click', e => {
+      if (window.parent === window) return;   // not inside the site
+      e.preventDefault();
+      window.parent.location.hash = '#/' + link.dataset.route;
+    });
+  });
+</script>
 
 </div>
 

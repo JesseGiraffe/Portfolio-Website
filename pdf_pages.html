@@ -6,79 +6,136 @@
 <title>PDF</title>
 <link rel="stylesheet" href="system.css" />
 <style>
-  /* ===== MULTI-PAGE PDF VIEW =====
-     iOS WebKit renders only the FIRST page of a PDF shown in a frame, and
-     gives it no scrolling. It does honour the #page=N fragment, though —
-     so one frame per page, stacked, produces the whole document.
+  /* ===== MULTI-PAGE PDF VIEW (phones and tablets) =====
+     iOS Safari shows only the FIRST page of a PDF inside a frame, with no
+     scrolling, and Android Chrome shows no PDF at all - just a download
+     button. So on touch devices index.html loads this page instead (see
+     targetFor() there), which draws every page itself using PDF.js -
+     Mozilla's PDF renderer, the same one built into Firefox.
 
-     The file served is still the original .pdf; nothing is converted. The
-     browser fetches it once and serves the rest of the frames from cache.
+     Usage: pdf_pages.html?file=CNC_Plan.pdf
 
-     Desktop never gets here: it keeps the native single-frame viewer with
-     its toolbar, search and download. See targetFor() in index.html. */
+     Desktop never comes here: it keeps the browser's own viewer, with its
+     toolbar, search and download. */
 
   html, body {
     margin: 0;
     padding: 0;
-    min-height: 100%;
     font-family: sans-serif;
+  }
+
+  /* Named .scroll-container on purpose: index.html measures that class to
+     grow the window to fit on phones, same as the project pages. */
+  .scroll-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+
+  .pdf-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: .85rem;
+  }
+
+  .pdf-page {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #fff;
   }
 
   .pages {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 12px;
-    box-sizing: border-box;
-    -webkit-overflow-scrolling: touch;
   }
 
   .pages .image-container { padding: 0; }
-
-  .page {
-    display: block;
-    width: 100%;
-    /* US Letter; the ratio query param overrides it per document. */
-    aspect-ratio: 612 / 792;
-    border: 0;
-    background: #fff;
-  }
 </style>
 <!-- Frutiger Aero skin - loaded last so it overrides the styles above -->
 <link rel="stylesheet" href="theme.css" />
+<link rel="stylesheet" href="mobile.css" />
 </head>
 <body>
 
-<div class="pages" id="pages"></div>
+<div class="scroll-container">
+  <div class="pdf-bar">
+    <span id="status">Loading…</span>
+    <!-- Opening the file directly gives the phone's full-screen viewer,
+         which does show every page, plus share/save. -->
+    <a id="openFull" target="_blank" rel="noopener">Open full PDF</a>
+  </div>
+  <div class="pages" id="pages"></div>
+</div>
 
+<!-- PDF.js 3.x: the last version shipped as a plain script (4.x and later
+     are ES modules only). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   const params = new URLSearchParams(location.search);
-  const file  = params.get('file') || '';
-  const ratio = params.get('ratio');
-  const pages = Math.min(Math.max(parseInt(params.get('pages'), 10) || 1, 1), 60);
-
-  // Only ever point at a PDF beside this page — never an arbitrary URL
-  // handed to us in the query string.
-  const safe = /^[\w./-]+\.pdf$/i.test(file) && !file.includes('..');
+  const file = params.get('file') || '';
   const host = document.getElementById('pages');
+  const status = document.getElementById('status');
+  const openFull = document.getElementById('openFull');
 
-  if (safe) {
-    for (let n = 1; n <= pages; n++) {
+  // Only ever render a PDF from this site - never an arbitrary URL handed
+  // to us in the query string.
+  const safe = /^[\w./-]+\.pdf$/i.test(file) && !file.includes('..');
+
+  function fail(message) {
+    status.textContent = message;
+  }
+
+  async function render() {
+
+    if (!safe) { openFull.hidden = true; return fail('No document.'); }
+    openFull.href = file;
+
+    if (!window.pdfjsLib) return fail('Couldn’t load the viewer.');
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // isEvalSupported:false closes a known PDF.js 3.x hole (CVE-2024-4367)
+    // that let a booby-trapped PDF run script. These are our own files,
+    // but there is no reason to leave it open.
+    const pdf = await pdfjsLib.getDocument({ url: file, isEvalSupported: false }).promise;
+
+    status.textContent = pdf.numPages + (pdf.numPages === 1 ? ' page' : ' pages');
+
+    // Draw at the on-screen width times the screen's pixel density so text
+    // is sharp, capped at 2x to keep memory sane on phones.
+    const cssWidth = host.clientWidth || 360;
+    const density = Math.min(window.devicePixelRatio || 1, 2);
+
+    for (let n = 1; n <= pdf.numPages; n++) {
+
+      const page = await pdf.getPage(n);
+      const base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: (cssWidth / base.width) * density });
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'pdf-page';
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', 'Page ' + n + ' of ' + pdf.numPages);
 
       const shell = document.createElement('div');
       shell.className = 'image-container';
-
-      const frame = document.createElement('iframe');
-      frame.className = 'page';
-      frame.setAttribute('title', 'Page ' + n + ' of ' + pages);
-      frame.setAttribute('loading', n > 2 ? 'lazy' : 'eager');
-      if (ratio) frame.style.aspectRatio = ratio;
-      frame.src = file + '#page=' + n + '&view=Fit';
-
-      shell.appendChild(frame);
+      shell.appendChild(canvas);
       host.appendChild(shell);
+
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     }
   }
+
+  render().catch(() => fail('Couldn’t display this PDF here.'));
 </script>
 
 </body>

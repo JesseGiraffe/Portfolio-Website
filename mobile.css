@@ -1,0 +1,82 @@
+/* ============================================================
+   Phone layout for the project pages (the *_embed.html files).
+
+   Loaded LAST in each embed, after theme.css, so it wins over the
+   page's own <style> block. Kept separate from theme.css on purpose:
+   the classic (floppy) skin switches theme.css off inside the
+   iframes, and this layout has to apply in both skins.
+
+   The breakpoint measures the IFRAME, not the phone, so it also
+   kicks in when the window is narrow on a desktop.
+   ============================================================ */
+
+@media (max-width: 640px) {
+
+  /* The About page locks the page height and scrolls only its text
+     column. Stacked, that would clip the text, so let the page itself
+     scroll instead. Harmless on the pages that don't do this. */
+  html, body {
+    height: auto;
+    overflow: auto;
+  }
+
+  /* Two columns -> one: models and images first, text underneath. */
+  .scroll-container {
+    flex-direction: column;
+    height: auto;
+    gap: 12px;
+    padding: 8px;
+  }
+
+  /* flex:1 means "share the width" side by side, but in a column it
+     means "share a height", which squashes the cards. */
+  .left-content,
+  .right-content {
+    flex: none;
+  }
+
+  /* Reading order on a phone: the first image/model, then the text, then
+     the rest of the images. Otherwise pages with many images bury the
+     writing under several screens of pictures.
+
+     display:contents removes the left column's own box, so its cards
+     become direct items of .scroll-container and can be re-ordered
+     around the text. The HTML is unchanged - desktop keeps two columns. */
+  .left-content { display: contents; }
+
+  .left-content > :first-child   { order: 0; }
+  .right-content                 { order: 1; }
+  .left-content > :not(:first-child) { order: 2; }
+
+  /* Opt-in: add class="mobile-top" to any other card in the left column
+     to keep it above the text too. Must stay below the rule above - both
+     selectors are equally specific, so the later one wins. */
+  .left-content > .mobile-top { order: 0; }
+
+  .right-content {
+    max-height: none;
+    overflow: visible;
+    padding: 16px;
+  }
+
+  /* Full-width images are fine for landscape shots, but a tall portrait
+     (the About photo) fills the whole screen and hides the text below.
+     Cap the height and let the width follow, centred. vh here is the
+     IFRAME's height, so 40vh is ~40% of the project window. */
+  .image-container img {
+    width: auto;
+    max-width: 100%;
+    max-height: 40vh;
+    margin: 0 auto;
+  }
+
+  /* ...and shrink the card to hug the image, so a narrow portrait doesn't
+     sit in a full-width frame with empty space either side. Wide images
+     still fill the width. */
+  .left-content .image-container {
+    width: fit-content;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin-inline: auto;
+  }
+}

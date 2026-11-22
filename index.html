@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
+  <!-- Without this, phones lay the page out as a ~980px desktop and shrink
+       it to fit, and none of the max-width media queries ever fire. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="module"
     src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js">
   </script>
@@ -166,6 +170,20 @@
       align-items: center;
       padding: 0 12px;
       line-height: 1;
+    }
+
+    /* "Show email" button, styled to sit in the bar like the link it
+       turns into. */
+    .menubar-bottom .email-reveal {
+      all: unset;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .menubar-bottom .email-reveal:focus-visible {
+      outline: 1px solid currentColor;
+      outline-offset: 2px;
     }
 
     .menubar-bottom a {
@@ -375,6 +393,64 @@
       .title-bar .nav-btn { width: 42px; }
 
       ul[role="menu-bar"] > [role="menu-item"] { padding: 0 11px; }
+
+      /* The window's position and size live in its inline style attribute
+         (left 17.5%, width 65%, min-width 400px), which beats any normal
+         rule and would push it off the right edge of a phone. !important
+         is the only thing that outranks an inline style - and the inline
+         values the drag/resize code writes - so it's needed here.
+         left + right with width:auto stretches it edge to edge. */
+      #draggableWindow {
+        left: 0 !important;
+        right: 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 8px !important;
+      }
+
+      /* Dragging and resizing are mouse-only and pointless at full width. */
+      #resizer { display: none; }
+      #titleBar { cursor: default; }
+
+      /* Long project names would shove the ‹ › arrows off the bar. */
+      #titleBar .title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      /* Menubar is too wide for a phone: drop the name (it's in the tab
+         title already) and shorten "Project Photos" to "Photos". */
+      .hide-narrow { display: none !important; }
+    }
+
+    /* ===== PHONE: ONE SCROLLING PAGE =====
+       A fixed-height window with its own scrollbar is awkward on a phone
+       (scroll inside the box, then scroll the page). Here the window drops
+       into normal page flow and fitProject() in the script below sizes
+       the iframe to its content, so the whole site scrolls as one page.
+
+       640px matches mobile.css: at this width the project pages are
+       always in their stacked layout, which is what makes their content
+       height measurable. (The About page's two-column layout fills the
+       window instead, so measuring it would just return the window's own
+       height.) Keep the two numbers in step. */
+    @media (max-width: 640px) {
+      #draggableWindow {
+        position: relative !important;
+        top: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+      }
+
+      #draggableWindow .window-pane { flex: none; }
+
+      /* The desktop gap that clears the absolutely-positioned window isn't
+         needed once the window is in the flow. */
+      #project-photos { margin-top: 12px !important; }
     }
   </style>
   
@@ -388,7 +464,7 @@
    
   </li>
 
-  <li role="menu-item" tabindex="0" aria-haspopup="true">
+  <li role="menu-item" tabindex="0" aria-haspopup="true" class="hide-narrow">
     Jesse Santoro
   
   </li>
@@ -418,7 +494,7 @@
   </li>
 
   <li role="menu-item" tabindex="0" aria-haspopup="true">
-  Project Photos
+  <span class="hide-narrow">Project&nbsp;</span>Photos
   <ul role="menu">
     <li role="menu-item"><a href="#project-photos">View Gallery</a></li>
   </ul>
@@ -520,7 +596,12 @@
 </div>
 </div>
 <!--Image Gallery-->
-<div id="project-photos" class="window" style="margin-top: min(800px, 90vh);"  >
+<!-- margin-top clears the project window above it, which is absolutely
+     positioned and so takes up no space. Window bottom = 70px (top 50 +
+     margin 20) + its height, clamp(300px, 80vh, 750px); body padding puts
+     44px above this margin, so +40px leaves a ~14px gap and keeps this
+     title bar on screen. Change both if the window's height changes. -->
+<div id="project-photos" class="window" style="margin-top: min(800px, calc(max(300px, 80vh) + 40px));"  >
 <div>
 <div class="titlebar">
   <div class="title-bar">
@@ -546,7 +627,9 @@
 <!-- ===== BOTTOM BAR ===== -->
 <ul role="menu-bar" class="menubar-bottom">
   <li role="menu-item">
-    <a href="mailto:js@jessesantoro.com">Contact: js@jessesantoro.com</a>
+    <!-- Address is assembled by email.js on click - see that file. -->
+    <button type="button" class="email-reveal" data-u="sj" data-h="moc.orotnasessej"
+            data-prefix="Contact: ">Contact: Show email</button>
   </li>
   <li role="menu-item">
     <a href="https://www.linkedin.com/in/jessesantoro" target="_blank"
@@ -558,6 +641,7 @@
   </li>
 </ul>
 
+<script src="email.js"></script>
 <script>
 
 const windowEl = document.querySelector('[data-draggable]');
@@ -670,16 +754,31 @@ const projectTitle = document.querySelector('#draggableWindow .title');
 // Matches the iframe's hardcoded src, so the default route doesn't reload it.
 let current = PROJECTS[DEFAULT_SLUG];
 
+/* PDFs: touch devices can't show them in a frame properly - iOS Safari
+   shows only page 1, Android Chrome shows nothing but a download button -
+   so phones and tablets get pdf_pages.html, which draws every page itself.
+   Mouse-driven desktops keep the browser's built-in viewer, which has
+   search and download. "pointer: coarse" means the main input is a finger. */
+const touchQuery = window.matchMedia('(pointer: coarse)');
+
+function targetFor(project) {
+  if (/\.pdf$/i.test(project.file) && touchQuery.matches) {
+    return 'pdf_pages.html?file=' + encodeURIComponent(project.file);
+  }
+  return project.file;
+}
+
 function show(slug) {
 
   const project = PROJECTS[slug] || PROJECTS[DEFAULT_SLUG];
 
   if (project !== current) {
+    const target = targetFor(project);
     // location.replace() rather than .src — assigning src pushes an entry onto
     // THIS page's history, so Back would step through stale iframes instead of
     // moving between routes. The catch covers PDFs blocking contentWindow.
-    try { projectFrame.contentWindow.location.replace(project.file); }
-    catch (err) { projectFrame.src = project.file; }
+    try { projectFrame.contentWindow.location.replace(target); }
+    catch (err) { projectFrame.src = target; }
     current = project;
   }
 
@@ -928,6 +1027,58 @@ galleryFrame.addEventListener('load', () => {
 });
 
 window.addEventListener('resize', fitGallery);
+
+/* ===== PHONE: PROJECT WINDOW AUTO-HEIGHT =====
+   Same idea as the gallery above, but only on phones (see the
+   "PHONE: ONE SCROLLING PAGE" CSS). On desktop the window keeps its fixed,
+   resizable height and the iframe's inline height is cleared. */
+
+const phoneQuery = window.matchMedia('(max-width: 640px)');
+let projectObserver = null;
+
+function fitProject() {
+
+  if (!phoneQuery.matches) {
+    projectFrame.style.height = '';
+    return;
+  }
+
+  try {
+    const doc = projectFrame.contentDocument;
+    // Measure the page's own wrapper, not the document: the document is
+    // at least as tall as the iframe, so it could grow but never shrink.
+    const content = doc && doc.querySelector('.scroll-container');
+    if (content) {
+      projectFrame.style.height = Math.ceil(content.getBoundingClientRect().height) + 'px';
+      return;
+    }
+  } catch (err) {}
+
+  // Anything without a .scroll-container - in practice a PDF shown in the
+  // browser's own viewer, which only happens on a narrow window with a
+  // mouse (touch devices get pdf_pages.html) - gets a fixed screenful.
+  projectFrame.style.height = '75vh';
+}
+
+projectFrame.addEventListener('load', () => {
+
+  fitProject();
+
+  // Re-measure as images and 3D models load in and change the height.
+  if (projectObserver) projectObserver.disconnect();
+  try {
+    const content = projectFrame.contentDocument.querySelector('.scroll-container');
+    if (content && window.ResizeObserver) {
+      projectObserver = new ResizeObserver(fitProject);
+      projectObserver.observe(content);
+    }
+  } catch (err) {}
+
+});
+
+phoneQuery.addEventListener('change', fitProject);
+window.addEventListener('resize', fitProject);
+fitProject();   // the first page may have loaded before this script ran
 
 </script>
 
